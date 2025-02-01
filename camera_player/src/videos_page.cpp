@@ -277,7 +277,8 @@ void VideosPage::scan_videos()
     }
 
     QStringList filters;
-    filters << "*.jpeg" << "*.jpg";
+    filters << "*.jpeg"
+            << "*.jpg";
     m_pending_files =
         dir.entryInfoList(filters, QDir::Files, QDir::Time | QDir::Reversed);
 

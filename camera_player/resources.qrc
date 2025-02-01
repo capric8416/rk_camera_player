@@ -30,6 +30,14 @@
         <file>resources/launcher/settings.png</file>
         <file>resources/launcher/videos.png</file>
         
+        <!-- Settings Page -->
+        <file>resources/style/settings_page.qss</file>
+        <file>resources/icon/language_set.png</file>
+        <file>resources/icon/date_time_set.png</file>
+        <file>resources/icon/brightness_set.png</file>
+        <file>resources/icon/back_set.png</file>
+        <file>resources/icon/right_arrow.png</file>
+        
         <!-- Translation files (QM) - 运行 build.py translate 生成 -->
         <file>translations/en.qm</file>
         <file>translations/zh_CN.qm</file>

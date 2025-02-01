@@ -11,6 +11,7 @@
 #include "launcher_page.hpp"
 #include "player/file_player.hpp"
 #include "player/logger.hpp"
+#include "settings_page.hpp"
 #include "stdin_cmd.hpp"
 #include "ui_main_window.h"
 #include "videos_page.hpp"
@@ -85,11 +86,25 @@ MainWindow::MainWindow(QWidget *parent)
         this,
         &MainWindow::show_videos_page
     );
+    connect(
+        ui->launcherPage,
+        &LauncherPage::settings_clicked,
+        this,
+        &MainWindow::show_settings_page
+    );
 
     // 连接 gallery 页面返回信号
     connect(
         ui->galleryPage,
         &GalleryPage::back_clicked,
+        this,
+        &MainWindow::show_launcher_page
+    );
+
+    // 连接 settings 页面返回信号
+    connect(
+        ui->settingsPage,
+        &SettingsPage::back_clicked,
         this,
         &MainWindow::show_launcher_page
     );
@@ -222,6 +237,14 @@ void MainWindow::show_videos_page()
     ui->videosPage->refresh();
     ui->stackedWidget->setCurrentWidget(ui->videosPage);
     LOG_INFO("Switched to videos page");
+}
+
+void MainWindow::show_settings_page()
+{
+    ui->galleryPage->hide_action_menu(
+    ); // Ensure any overlays are hidden if necessary
+    ui->stackedWidget->setCurrentWidget(ui->settingsPage);
+    LOG_INFO("Switched to settings page");
 }
 
 void MainWindow::handle_camera_connected()

@@ -27,6 +27,7 @@ public:
     void show_launcher_page();
     void show_gallery_page();
     void show_videos_page();
+    void show_settings_page();
 
 public slots:
     void start_camera();

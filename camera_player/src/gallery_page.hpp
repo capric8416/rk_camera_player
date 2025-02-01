@@ -38,6 +38,11 @@ public:
      */
     void refresh();
 
+    /**
+     * 隐藏操作菜单
+     */
+    void hide_action_menu();
+
 signals:
     /**
      * 返回按钮点击信号
@@ -66,7 +71,6 @@ private:
     void show_previous_image();
     void show_next_image();
     void show_action_menu();
-    void hide_action_menu();
     void delete_current_image();
 
     Ui::GalleryPage *ui;

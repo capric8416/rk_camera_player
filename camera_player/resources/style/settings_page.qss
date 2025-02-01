@@ -1,0 +1,66 @@
+/* SettingsPage 设置页面样式 */
+
+/* 标题栏容器 */
+#settingsPage QWidget#headerWidget {
+    background-color: #007CB0;
+}
+
+/* 返回箭头和标题 */
+#settingsPage QLabel#backLabel,
+#settingsPage QLabel#titleLabel {
+    color: white;
+    background-color: transparent;
+}
+
+/* 列表容器 */
+#settingsPage QListWidget#optionList {
+    padding: 10px;
+    border: none;
+    background-color: rgb(233,233,231);
+}
+
+#settingsPage QListWidget#optionList::item {
+    padding: 0px;
+    border: none;
+}
+
+/* 列表项容器 - 默认白色背景 */
+#settingsPage QWidget#optionItemWidget {
+    background-color: white;
+    border: none;
+    padding: 1px;
+}
+
+/* 列表项容器 - 选中状态蓝色背景 */
+#settingsPage QWidget#optionItemWidget[selected="true"] {
+    background-color: rgb(111,156,211);
+}
+
+/* 列表项内的标签 - 默认 */
+#settingsPage QWidget#optionItemWidget QLabel {
+    background-color: white;
+    border: none;
+    color: black;
+    font-size: 18px;
+}
+
+/* 列表项内的标签 - 选中状态 */
+#settingsPage QWidget#optionItemWidget[selected="true"] QLabel {
+    background-color: rgb(111,156,211);
+}
+
+/* 图标标签 */
+#settingsPage QLabel#iconLabel {
+    background-color: transparent;
+}
+
+/* 文字标签 */
+#settingsPage QLabel#textLabel {
+    font-size: 18px;
+    color: black;
+}
+
+/* 箭头标签 */
+#settingsPage QLabel#arrowLabel {
+    background-color: transparent;
+}

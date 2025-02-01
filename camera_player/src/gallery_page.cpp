@@ -311,7 +311,10 @@ void GalleryPage::scan_images()
     }
 
     QStringList filters;
-    filters << "*.jpeg" << "*.jpg" << "*.png" << "*.bmp";
+    filters << "*.jpeg"
+            << "*.jpg"
+            << "*.png"
+            << "*.bmp";
     m_pending_files =
         dir.entryInfoList(filters, QDir::Files, QDir::Time | QDir::Reversed);
 
