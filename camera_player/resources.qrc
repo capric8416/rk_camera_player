@@ -1,0 +1,38 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <!-- Style files -->
+        <file>resources/style/main_window.qss</file>
+        <file>resources/style/camera_overlay_page.qss</file>
+        <file>resources/style/file_overlay_page.qss</file>
+        <file>resources/style/launcher_page.qss</file>
+        
+        <!-- Icon files -->
+        <file>resources/icon/battery_0.png</file>
+        <file>resources/icon/battery_1.png</file>
+        <file>resources/icon/battery_2.png</file>
+        <file>resources/icon/battery_3.png</file>
+        <file>resources/icon/battery_4.png</file>
+        <file>resources/icon/sd_card_0.png</file>
+        <file>resources/icon/sd_card_1.png</file>
+        <file>resources/icon/sd_card_2.png</file>
+        
+        <!-- Overlay icons -->
+        <file>resources/icon/camera_normal.png</file>
+        <file>resources/icon/camera_capture.png</file>
+        <file>resources/icon/camera_offline.png</file>
+        <file>resources/icon/video_normal.png</file>
+        <file>resources/icon/video_recording.png</file>
+        
+        <!-- Launcher icons -->
+        <file>resources/launcher/back.png</file>
+        <file>resources/launcher/gallery.png</file>
+        <file>resources/launcher/settings.png</file>
+        <file>resources/launcher/videos.png</file>
+        
+        <!-- Translation files (QM) - 运行 build.py translate 生成 -->
+        <file>translations/en.qm</file>
+        <file>translations/zh_CN.qm</file>
+    </qresource>
+</RCC>
+

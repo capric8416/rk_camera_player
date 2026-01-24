@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>RV1126B Camera Player</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="mainLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <!-- Page 0: cameraOverlayPage (透明叠加层) - Promoted to CameraOverlayPage -->
+      <widget class="CameraOverlayPage" name="cameraOverlayPage"/>
+      <!-- Page 1: fileOverlayPage (文件播放叠加层) - Promoted to FileOverlayPage -->
+      <widget class="FileOverlayPage" name="fileOverlayPage"/>
+      <!-- Page 2: launcherPage (启动器菜单) - Promoted to LauncherPage -->
+      <widget class="LauncherPage" name="launcherPage"/>
+      <!-- Page 3: galleryPage (图片库) - Promoted to GalleryPage -->
+      <widget class="GalleryPage" name="galleryPage"/>
+      <!-- Page 4: videosPage (视频库) - Promoted to VideosPage -->
+      <widget class="VideosPage" name="videosPage"/>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CameraOverlayPage</class>
+   <extends>QWidget</extends>
+   <header>camera_overlay_page.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FileOverlayPage</class>
+   <extends>QWidget</extends>
+   <header>file_overlay_page.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LauncherPage</class>
+   <extends>QWidget</extends>
+   <header>launcher_page.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GalleryPage</class>
+   <extends>QWidget</extends>
+   <header>gallery_page.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>VideosPage</class>
+   <extends>QWidget</extends>
+   <header>videos_page.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

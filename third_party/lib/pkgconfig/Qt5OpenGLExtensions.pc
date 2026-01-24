@@ -1,0 +1,14 @@
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include/qt5
+
+
+Name: Qt5 OpenGLExtensions
+Description: Qt OpenGLExtensions module
+Version: 5.15.18
+
+
+Libs: "-L${libdir}" -lQt5OpenGLExtensions "-L${prefix}/lib" "-L${prefix}/lib/manual-link" ${prefix}/lib/libQt5Gui.so "-L${prefix}/lib/pkgconfig/../../lib" -lharfbuzz -pthread -lstdc++ -lfreetype -lpng16 -lz ${prefix}/lib/libQt5Core.so -lm -lpcre2-16 ${prefix}/lib/libpng16.so ${prefix}/lib/libz.so -lpthread ${prefix}/lib/libpng16.so ${prefix}/lib/libz.so
+Requires: Qt5Core Qt5Gui
+Cflags: -DQT_OPENGLEXTENSIONS_LIB "-I${includedir}/QtOpenGLExtensions" "-I${includedir}"

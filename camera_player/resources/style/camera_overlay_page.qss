@@ -1,0 +1,35 @@
+/* CameraCameraOverlayPage 叠加层样式 */
+
+/* 顶部状态栏 - 透明 */
+QWidget#topStatusBar {
+    background-color: transparent;
+}
+
+/* 底部状态栏 - 透明 */
+QWidget#bottomStatusBar {
+    background-color: transparent;
+}
+
+/* 顶部状态栏文本 - 白色 */
+QWidget#topStatusBar QLabel {
+    color: white;
+    font-size: 14px;
+}
+
+/* 底部状态栏文本 - 绿色 20px */
+QWidget#bottomStatusBar QLabel {
+    color: #00FF00;
+    font-size: 20px;
+}
+
+/* 文件路径标签 */
+QLabel#filePathLabel {
+    color: #00FF00;
+    font-size: 20px;
+}
+
+/* 日期时间标签 */
+QLabel#dateTimeLabel {
+    color: #00FF00;
+    font-size: 20px;
+}

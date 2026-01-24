@@ -1,0 +1,6 @@
+cmake==4.2.1
+colorama==0.4.6
+meson==1.10.1
+ninja==1.13.0
+pkgconf==2.5.1.post0
+zig-bin==0.14.1

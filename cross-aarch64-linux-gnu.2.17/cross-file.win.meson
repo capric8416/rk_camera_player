@@ -1,0 +1,23 @@
+[binaries]
+c = 'zig-cc.cmd'
+cpp = 'zig-c++.cmd'
+ar = 'zig-ar.cmd'
+strip = 'zig-strip.cmd'
+ranlib = 'zig-ranlib.cmd'
+libtool = 'zig-libtool.cmd'
+pkg-config = 'pkgconf'
+
+[built-in options]
+c_args = []
+cpp_args = ['-fpermissive']
+c_link_args = []
+cpp_link_args = []
+
+[properties]
+sys_root = ''
+
+[host_machine]
+system = 'linux'
+cpu_family = 'aarch64'
+cpu = 'aarch64'
+endian = 'little'

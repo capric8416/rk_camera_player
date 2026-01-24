@@ -1,0 +1,26 @@
+/* FileOverlayPage 叠加层样式 */
+
+/* 顶部状态栏 - 透明 */
+QWidget#topStatusBar {
+    background-color: transparent;
+}
+
+/* 顶部状态栏文本 - 绿色 24px */
+QWidget#topStatusBar QLabel {
+    color: #00FF00;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* 播放时间标签 */
+QLabel#timeLabel {
+    color: #00FF00;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* 文件名标签 */
+QLabel#filenameLabel {
+    color: #00FF00;
+    font-size: 20px;
+}

@@ -1,0 +1,6 @@
+builddir.win/
+builddir.nix/
+env.win/
+env.nix/
+output/
+vcpkg/

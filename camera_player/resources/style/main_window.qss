@@ -1,0 +1,11 @@
+/* MainWindow 主窗口样式 */
+
+/* 主窗口 - 透明背景 */
+QMainWindow {
+    background-color: transparent;
+}
+
+/* 中央部件 - 透明 */
+QWidget#centralWidget {
+    background-color: transparent;
+}

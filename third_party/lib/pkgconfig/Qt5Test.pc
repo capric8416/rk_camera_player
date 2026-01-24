@@ -1,0 +1,14 @@
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include/qt5
+
+
+Name: Qt5 Test
+Description: Qt Unit Testing Library
+Version: 5.15.18
+
+
+Libs: "-L${libdir}" -lQt5Test "-L${prefix}/lib" "-L${prefix}/lib/manual-link" ${prefix}/lib/libQt5Core.so -lm "-L${prefix}/lib/pkgconfig/../../lib" -lpcre2-16 ${prefix}/lib/libpng16.so ${prefix}/lib/libz.so -lpthread ${prefix}/lib/libpng16.so ${prefix}/lib/libz.so
+Requires: Qt5Core
+Cflags: -DQT_TESTLIB_LIB "-I${includedir}/QtTest" "-I${includedir}"

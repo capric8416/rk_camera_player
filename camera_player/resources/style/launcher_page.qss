@@ -1,0 +1,22 @@
+/* LauncherPage 启动器页面样式 */
+
+/* 启动器顶部状态栏 */
+QWidget#launcherTopStatusBar {
+    background-color: transparent;
+}
+
+/* 启动器日期时间标签 - 绿色 */
+QLabel#launcherDateTimeLabel {
+    color: #00FF00;
+    font-size: 20px;
+}
+
+/* 启动器图标文字标签 */
+QLabel#galleryLabel,
+QLabel#videosLabel,
+QLabel#settingsLabel,
+QLabel#backLabel {
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+}
