@@ -89,7 +89,7 @@ def configure(script_dir, cross_dir, force=False, release=True):
     result = subprocess.run(cmd)
     return result.returncode == 0
 
-def build(script_dir):
+def build(script_dir, release=False):
     """编译项目"""
     build_dir = script_dir / BUILD_DIR
     
@@ -101,7 +101,40 @@ def build(script_dir):
     cmd = ["meson", "compile", "-C", str(build_dir)]
     
     result = subprocess.run(cmd)
-    return result.returncode == 0
+    if result.returncode != 0:
+        return False
+        
+    if release:
+        print("Release 构建: 执行 strip...")
+        binary_path = build_dir / "camera_player"
+        if binary_path.exists():
+            # zig-strip 需要输出到新文件，不能原地 strip
+            # 策略: rename -> strip -> delete renamed
+            unstripped_path = binary_path.with_suffix(".unstripped")
+            
+            try:
+                # 1. Rename original
+                shutil.move(binary_path, unstripped_path)
+                
+                # 2. Strip to original name
+                strip_cmd = ["zig-strip", "--strip-all", str(unstripped_path), str(binary_path)]
+                strip_result = subprocess.run(strip_cmd, shell=True)
+                
+                if strip_result.returncode == 0:
+                    print(f"Strip 完成: {binary_path}")
+                    # 3. Delete unstripped
+                    unstripped_path.unlink()
+                else:
+                    print("Strip 失败, 还原文件...")
+                    shutil.move(unstripped_path, binary_path)
+            except Exception as e:
+                print(f"Strip 过程出错: {e}, unstripped_path: {unstripped_path}, binary_path: {binary_path}")
+                if unstripped_path.exists() and not binary_path.exists():
+                    shutil.move(unstripped_path, binary_path)
+        else:
+            print(f"警告: 找不到二进制文件 {binary_path}, 跳过 strip")
+            
+    return True
 
 def translate(script_dir):
     """编译翻译文件 (.ts -> .qm)"""
@@ -158,19 +191,13 @@ def main():
     parser.add_argument(
         "--release", "-r",
         action="store_true",
-        default=True,
-        help="Release 构建 (默认)"
-    )
-    parser.add_argument(
-        "--debug", "-d",
-        action="store_true",
-        help="Debug 构建"
+        help="Release 构建"
     )
     
     args = parser.parse_args()
     
-    # debug 覆盖 release
-    release_build = not args.debug
+    # default to debug, unless release is specified
+    release_build = args.release
     
     print("=" * 50)
     print("Camera Player 交叉编译")
@@ -192,7 +219,7 @@ def main():
             print("配置失败!")
             return 1
     elif args.action == "build":
-        if not build(script_dir):
+        if not build(script_dir, release=release_build):
             print("编译失败!")
             return 1
     elif args.action == "rebuild":
@@ -201,7 +228,7 @@ def main():
         if not configure(script_dir, cross_dir, force=True, release=release_build):
             print("配置失败!")
             return 1
-        if not build(script_dir):
+        if not build(script_dir, release=release_build):
             print("编译失败!")
             return 1
     elif args.action == "translate":
@@ -212,7 +239,7 @@ def main():
         if not configure(script_dir, cross_dir, force=False, release=release_build):
             print("配置失败!")
             return 1
-        if not build(script_dir):
+        if not build(script_dir, release=release_build):
             print("编译失败!")
             return 1
     
