@@ -8,3 +8,5 @@ __pycache__/
 third_party/mpp/
 third_party/rga/
 third_party/ffmpeg/
+cross-aarch64-linux-gnu.2.17/msys2
+cross-aarch64-linux-gnu.2.17/llvm-nm.exe

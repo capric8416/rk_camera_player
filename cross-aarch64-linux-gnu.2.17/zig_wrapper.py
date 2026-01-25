@@ -21,7 +21,6 @@ TOOL_MAP = {
     "objcopy": ["objcopy"],
     "rc":      ["rc"],
     "windres": ["rc"],
-    "nm":      ["nm"],
     "strip":   ["objcopy", "--strip-all"]
 }
 # ===========================================
