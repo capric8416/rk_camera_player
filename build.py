@@ -173,7 +173,7 @@ def main():
     release_build = not args.debug
     
     print("=" * 50)
-    print("RV1126B Qt UI 交叉编译")
+    print("Camera Player 交叉编译")
     print("=" * 50)
     
     # 设置环境变量

@@ -32,7 +32,10 @@ def create_zig_wrapper():
     print("Creating zig wrapper...")
     subprocess.run([PATH_PYTHON, "zig_wrapper.py", "gen"])
 
-if __name__ == "__main__":
+def main():
     create_env()
     install_toolchain()
     create_zig_wrapper()
+
+if __name__ == "__main__":
+    main()

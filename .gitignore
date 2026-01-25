@@ -4,3 +4,4 @@ env.win/
 env.nix/
 output/
 vcpkg/
+__pycache__/
