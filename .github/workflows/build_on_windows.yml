@@ -1,0 +1,29 @@
+name: Build on Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+      env:
+        PYTHONUTF8: 1
+
+    - name: Run bootstrap
+      run: python bootstrap.py
+      env:
+        PYTHONUTF8: 1
+
+    - name: Run build
+      run: python build.py
+      env:
+        PYTHONUTF8: 1
