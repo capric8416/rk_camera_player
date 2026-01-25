@@ -13,6 +13,7 @@ TOOL_MAP = {
     "cxx":     ["c++"],
     "c++":     ["c++"],
     "cpp":     ["c++", "-E"],
+    "ld":      ["cc"],
     "ar":      ["ar"],
     "dlltool": ["dlltool"],
     "lib":     ["lib"],
@@ -80,7 +81,7 @@ def run_tool(tool_name, args):
     cmd = [ZIG_BIN] + zig_subcmd
     
     # 只有编译器相关的命令才注入 -target
-    if tool_name in ["cc", "cxx", "c++", "cpp"]:
+    if tool_name in ["cc", "cxx", "c++", "cpp", "ld"]:
         cmd.extend(["-target", TARGET_ARCH])
     
     # 过滤掉已弃用的链接器优化标志
