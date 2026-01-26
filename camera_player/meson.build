@@ -21,10 +21,13 @@ avcodec_dep = dependency('libavcodec', required: true)
 avformat_dep = dependency('libavformat', required: true)
 avutil_dep = dependency('libavutil', required: true)
 
-# Player 依赖 (Camera Overlay)
+# rockchip 依赖
 libdrm_dep = dependency('libdrm', required: true)
 librga_dep = dependency('librga', required: true)
 mpp_dep = dependency('rockchip_mpp', required: true)
+
+# spdlog 依赖
+spdlog_dep = dependency('spdlog', required: true)
 
 # Qt5 模块
 qt5 = import('qt5')
@@ -124,6 +127,7 @@ executable('camera_player',
         avcodec_dep,
         avformat_dep,
         avutil_dep,
+        spdlog_dep,
     ],
     install: true,
 )
