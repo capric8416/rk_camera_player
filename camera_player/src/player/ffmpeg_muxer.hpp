@@ -2,15 +2,15 @@
 
 /**
  * FFmpegMuxer - FFmpeg MP4 容器封装器
- * 
+ *
  * 功能:
  * - 将 H.264/HEVC 编码数据封装为 MP4 容器
  * - 支持 fragmented MP4 (frag_keyframe + empty_moov)
  * - 支持 faststart (moov 前置)
  */
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -25,7 +25,8 @@ namespace player {
 /**
  * FFmpeg Muxer 配置
  */
-struct MuxerConfig {
+struct MuxerConfig
+{
     std::string output_path;
     int width = 1920;
     int height = 1080;
@@ -37,21 +38,22 @@ struct MuxerConfig {
     std::vector<uint8_t> extradata; // VPS/SPS/PPS
 };
 
-class FFmpegMuxer {
+class FFmpegMuxer
+{
 public:
     FFmpegMuxer();
     ~FFmpegMuxer();
 
     // 禁止拷贝
-    FFmpegMuxer(const FFmpegMuxer&) = delete;
-    FFmpegMuxer& operator=(const FFmpegMuxer&) = delete;
+    FFmpegMuxer(const FFmpegMuxer &) = delete;
+    FFmpegMuxer &operator=(const FFmpegMuxer &) = delete;
 
     /**
      * 打开输出文件
      * @param config 配置参数
      * @return 成功返回 true
      */
-    bool open(const MuxerConfig& config);
+    bool open(const MuxerConfig &config);
 
     /**
      * 写入编码后的数据包
@@ -61,7 +63,12 @@ public:
      * @param pts 显示时间戳 (帧序号)
      * @return 成功返回 true
      */
-    bool write_packet(const uint8_t* data, size_t size, bool is_keyframe, int64_t pts);
+    bool write_packet(
+        const uint8_t *data,
+        size_t size,
+        bool is_keyframe,
+        int64_t pts
+    );
 
     /**
      * 关闭文件并写入尾部
@@ -81,11 +88,11 @@ public:
 
 private:
     bool init_codec_params();
-    
-    AVFormatContext* m_fmt_ctx;
-    AVStream* m_video_stream;
-    AVPacket* m_packet;
-    
+
+    AVFormatContext *m_fmt_ctx;
+    AVStream *m_video_stream;
+    AVPacket *m_packet;
+
     MuxerConfig m_config;
     bool m_opened;
     bool m_header_written;

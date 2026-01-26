@@ -2,17 +2,18 @@
 
 /**
  * MppDecoder - MPP 解码器
- * 
+ *
  * 支持 MJPEG, H.264, H.265 解码
  */
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <rockchip/rk_type.h>
 
 namespace player {
 
-struct DecodedFrame {
+struct DecodedFrame
+{
     int fd;
     void *data;
     uint32_t width;
@@ -21,7 +22,8 @@ struct DecodedFrame {
     uint32_t ver_stride;
 };
 
-class MppDecoder {
+class MppDecoder
+{
 public:
     MppDecoder();
     ~MppDecoder();
@@ -34,7 +36,8 @@ public:
      * 初始化解码器
      * @param width 视频宽度
      * @param height 视频高度
-     * @param coding_type 编码类型: MPP_VIDEO_CodingMJPEG, MPP_VIDEO_CodingAVC, MPP_VIDEO_CodingHEVC
+     * @param coding_type 编码类型: MPP_VIDEO_CodingMJPEG, MPP_VIDEO_CodingAVC,
+     * MPP_VIDEO_CodingHEVC
      */
     bool init(
         uint32_t width,
@@ -50,14 +53,10 @@ public:
      * @param frame 输出解码帧
      * @return 成功返回 true
      */
-    bool decode(
-        const uint8_t *data,
-        size_t size,
-        DecodedFrame &frame
-    );
+    bool decode(const uint8_t *data, size_t size, DecodedFrame &frame);
 
 private:
-    void *m_impl;        // MppDecoderImpl*
+    void *m_impl; // MppDecoderImpl*
     uint32_t m_width;
     uint32_t m_height;
     uint32_t m_hor_stride;

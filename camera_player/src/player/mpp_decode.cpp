@@ -1,12 +1,12 @@
 #include "mpp_decode.hpp"
 #include "logger.hpp"
 
-#include <rockchip/rk_mpi.h>
 #include <rockchip/mpp_buffer.h>
 #include <rockchip/mpp_frame.h>
+#include <rockchip/mpp_meta.h>
 #include <rockchip/mpp_packet.h>
 #include <rockchip/mpp_task.h>
-#include <rockchip/mpp_meta.h>
+#include <rockchip/rk_mpi.h>
 
 #include <cstring>
 
@@ -17,11 +17,12 @@
 namespace player {
 
 // 内部实现结构
-struct MppDecoderImpl {
+struct MppDecoderImpl
+{
     MppCtx ctx;
     MppApi *mpi;
     MppDecCfg cfg;
-    
+
     // Task mode 资源 (MJPEG)
     MppBufferGroup frame_grp;
     MppBufferGroup packet_grp;
@@ -30,22 +31,27 @@ struct MppDecoderImpl {
     MppFrame frame;
     MppPacket packet;
     size_t packet_size;
-    
+
     // Simple mode 资源 (H.264/H.265)
     void *simple_packet_buf;
     size_t simple_packet_buf_size;
-    MppFrame simple_frame;  // 保存帧引用
-    
-    bool use_simple_api;  // true 使用简单 API, false 使用 task mode
+    MppFrame simple_frame; // 保存帧引用
+
+    bool use_simple_api; // true 使用简单 API, false 使用 task mode
 };
 
 // 转换 coding_type 为字符串
-static const char *coding_type_to_string(MppCodingType type) {
+static const char *coding_type_to_string(MppCodingType type)
+{
     switch (type) {
-        case MPP_VIDEO_CodingMJPEG: return "MJPEG";
-        case MPP_VIDEO_CodingAVC:   return "H.264";
-        case MPP_VIDEO_CodingHEVC:  return "H.265";
-        default: return "Unknown";
+    case MPP_VIDEO_CodingMJPEG:
+        return "MJPEG";
+    case MPP_VIDEO_CodingAVC:
+        return "H.264";
+    case MPP_VIDEO_CodingHEVC:
+        return "H.265";
+    default:
+        return "Unknown";
     }
 }
 
@@ -60,15 +66,14 @@ MppDecoder::MppDecoder()
 {
 }
 
-MppDecoder::~MppDecoder() {
-    destroy();
-}
+MppDecoder::~MppDecoder() { destroy(); }
 
 bool MppDecoder::init(
     uint32_t width,
     uint32_t height,
     MppCodingType coding_type
-) {
+)
+{
     m_width = width;
     m_height = height;
     m_coding_type = coding_type;
@@ -77,10 +82,11 @@ bool MppDecoder::init(
 
     auto *impl = new MppDecoderImpl();
     memset(impl, 0, sizeof(MppDecoderImpl));
-    
+
     // H.264/H.265 使用简单 API，MJPEG 使用 task mode
-    impl->use_simple_api = (coding_type == MPP_VIDEO_CodingAVC || 
-                           coding_type == MPP_VIDEO_CodingHEVC);
+    impl->use_simple_api =
+        (coding_type == MPP_VIDEO_CodingAVC ||
+         coding_type == MPP_VIDEO_CodingHEVC);
 
     MPP_RET ret;
 
@@ -98,14 +104,20 @@ bool MppDecoder::init(
         impl->packet_size = width * height;
 
         // 创建 buffer groups
-        ret = mpp_buffer_group_get_internal(&impl->frame_grp, MPP_BUFFER_TYPE_DRM);
+        ret = mpp_buffer_group_get_internal(
+            &impl->frame_grp,
+            MPP_BUFFER_TYPE_DRM
+        );
         if (ret != MPP_OK) {
             LOG_ERROR("mpp_buffer_group_get_internal(frame) 失败");
             delete impl;
             return false;
         }
 
-        ret = mpp_buffer_group_get_internal(&impl->packet_grp, MPP_BUFFER_TYPE_DRM);
+        ret = mpp_buffer_group_get_internal(
+            &impl->packet_grp,
+            MPP_BUFFER_TYPE_DRM
+        );
         if (ret != MPP_OK) {
             LOG_ERROR("mpp_buffer_group_get_internal(packet) 失败");
             mpp_buffer_group_put(impl->frame_grp);
@@ -124,7 +136,11 @@ bool MppDecoder::init(
         }
 
         // 分配 packet buffer
-        ret = mpp_buffer_get(impl->packet_grp, &impl->packet_buf, impl->packet_size + 1024);
+        ret = mpp_buffer_get(
+            impl->packet_grp,
+            &impl->packet_buf,
+            impl->packet_size + 1024
+        );
         if (ret != MPP_OK) {
             LOG_ERROR("mpp_buffer_get(packet) 失败");
             mpp_frame_deinit(&impl->frame);
@@ -172,7 +188,10 @@ bool MppDecoder::init(
     // 初始化解码器
     ret = mpp_init(impl->ctx, MPP_CTX_DEC, coding_type);
     if (ret != MPP_OK) {
-        LOG_ERROR("mpp_init 失败, coding_type={}", coding_type_to_string(coding_type));
+        LOG_ERROR(
+            "mpp_init 失败, coding_type={}",
+            coding_type_to_string(coding_type)
+        );
         mpp_destroy(impl->ctx);
         if (impl->use_simple_api) {
             free(impl->simple_packet_buf);
@@ -190,7 +209,7 @@ bool MppDecoder::init(
     // 配置解码器
     mpp_dec_cfg_init(&impl->cfg);
     impl->mpi->control(impl->ctx, MPP_DEC_GET_CFG, impl->cfg);
-    
+
     // FFmpeg Demuxer (配合 bitstream filter) 已经输出了完整的 Annex-B 帧
     // 所以不需要开启 MPP 的 split_parse (裸流分包模式)
     if (impl->use_simple_api) {
@@ -201,14 +220,20 @@ bool MppDecoder::init(
     m_impl = impl;
     m_initialized = true;
 
-    LOG_INFO("MPP 解码器初始化: {}x{} stride={}x{} codec={} mode={}", 
-        m_width, m_height, m_hor_stride, m_ver_stride, 
+    LOG_INFO(
+        "MPP 解码器初始化: {}x{} stride={}x{} codec={} mode={}",
+        m_width,
+        m_height,
+        m_hor_stride,
+        m_ver_stride,
         coding_type_to_string(m_coding_type),
-        impl->use_simple_api ? "simple" : "task");
+        impl->use_simple_api ? "simple" : "task"
+    );
     return true;
 }
 
-void MppDecoder::destroy() {
+void MppDecoder::destroy()
+{
     if (!m_impl) {
         return;
     }
@@ -261,7 +286,13 @@ void MppDecoder::destroy() {
 }
 
 // Task Mode 解码 (MJPEG)
-static bool decode_task_mode(MppDecoderImpl *impl, const uint8_t *data, size_t size, DecodedFrame &frame) {
+static bool decode_task_mode(
+    MppDecoderImpl *impl,
+    const uint8_t *data,
+    size_t size,
+    DecodedFrame &frame
+)
+{
     // 复制数据到 packet buffer
     memcpy(mpp_packet_get_data(impl->packet), data, size);
     mpp_packet_set_length(impl->packet, size);
@@ -339,8 +370,17 @@ static bool decode_task_mode(MppDecoderImpl *impl, const uint8_t *data, size_t s
 }
 
 // Simple API 解码 (H.264/H.265)
-static bool decode_simple_mode(MppDecoderImpl *impl, const uint8_t *data, size_t size, DecodedFrame &frame,
-                               uint32_t &out_width, uint32_t &out_height, uint32_t &out_hor_stride, uint32_t &out_ver_stride) {
+static bool decode_simple_mode(
+    MppDecoderImpl *impl,
+    const uint8_t *data,
+    size_t size,
+    DecodedFrame &frame,
+    uint32_t &out_width,
+    uint32_t &out_height,
+    uint32_t &out_hor_stride,
+    uint32_t &out_ver_stride
+)
+{
     if (size > impl->simple_packet_buf_size) {
         LOG_WARN("NAL 数据过大: {} > {}", size, impl->simple_packet_buf_size);
         return false;
@@ -361,27 +401,29 @@ static bool decode_simple_mode(MppDecoderImpl *impl, const uint8_t *data, size_t
     // 发送 packet 到解码器
     ret = impl->mpi->decode_put_packet(impl->ctx, packet);
     mpp_packet_deinit(&packet);
-    
+
     if (ret != MPP_OK) {
         LOG_WARN("decode_put_packet failed: {}", static_cast<int>(ret));
-        // 即使 put_packet 失败，也尝试 get_frame，因为可能需要处理帧信息变化或错误
+        // 即使 put_packet 失败，也尝试
+        // get_frame，因为可能需要处理帧信息变化或错误
     }
 
     // 尝试获取解码后的帧
     MppFrame mpp_frame = nullptr;
     MPP_RET get_ret = impl->mpi->decode_get_frame(impl->ctx, &mpp_frame);
-    
+
     if (get_ret != MPP_OK) {
         if (ret != MPP_OK && get_ret != MPP_OK) {
-             // 两个都失败了，那才是真的失败
-             return false;
+            // 两个都失败了，那才是真的失败
+            return false;
         }
         // 如果 put 成功但 get 失败（通常是没帧），也算本次 decode 过程结束
-        // 但如果 put 失败 get 成功（罕见？），或者 put 失败 get 返回 info change...
+        // 但如果 put 失败 get 成功（罕见？），或者 put 失败 get 返回 info
+        // change...
         LOG_WARN("decode_get_frame failed: {}", static_cast<int>(get_ret));
         return false;
     }
-    
+
     if (!mpp_frame) {
         // 解码器还在缓冲，需要更多数据
         return false;
@@ -393,29 +435,41 @@ static bool decode_simple_mode(MppDecoderImpl *impl, const uint8_t *data, size_t
         out_height = mpp_frame_get_height(mpp_frame);
         out_hor_stride = mpp_frame_get_hor_stride(mpp_frame);
         out_ver_stride = mpp_frame_get_ver_stride(mpp_frame);
-        
-        LOG_INFO("帧信息变化: {}x{} stride={}x{}", 
-            out_width, out_height, out_hor_stride, out_ver_stride);
-        
+
+        LOG_INFO(
+            "帧信息变化: {}x{} stride={}x{}",
+            out_width,
+            out_height,
+            out_hor_stride,
+            out_ver_stride
+        );
+
         // 通知解码器信息变化已处理
-        ret = impl->mpi->control(impl->ctx, MPP_DEC_SET_INFO_CHANGE_READY, NULL);
+        ret =
+            impl->mpi->control(impl->ctx, MPP_DEC_SET_INFO_CHANGE_READY, NULL);
         if (ret != MPP_OK) {
-            LOG_ERROR("MPP_DEC_SET_INFO_CHANGE_READY failed: {}", static_cast<int>(ret));
+            LOG_ERROR(
+                "MPP_DEC_SET_INFO_CHANGE_READY failed: {}",
+                static_cast<int>(ret)
+            );
         }
-        
+
         mpp_frame_deinit(&mpp_frame);
-        // DO NOT RETURN FALSE here, try get_frame again? 
-        // No, typically return false and let calling loop handle it (by sending next packet or retrying?)
-        // Actually, if we return false, FilePlayer reads NEW packet. 
-        // But the previous packet was consumed? Or info change happens internally?
-        // Usually need to continue get_frame.
+        // DO NOT RETURN FALSE here, try get_frame again?
+        // No, typically return false and let calling loop handle it (by sending
+        // next packet or retrying?) Actually, if we return false, FilePlayer
+        // reads NEW packet. But the previous packet was consumed? Or info
+        // change happens internally? Usually need to continue get_frame.
         return false;
     }
 
     // 检查是否有错误或丢弃帧
     if (mpp_frame_get_errinfo(mpp_frame) || mpp_frame_get_discard(mpp_frame)) {
-        LOG_WARN("frame error/discard: err={}, discard={}", 
-            mpp_frame_get_errinfo(mpp_frame), mpp_frame_get_discard(mpp_frame));
+        LOG_WARN(
+            "frame error/discard: err={}, discard={}",
+            mpp_frame_get_errinfo(mpp_frame),
+            mpp_frame_get_discard(mpp_frame)
+        );
         mpp_frame_deinit(&mpp_frame);
         return false;
     }
@@ -436,8 +490,14 @@ static bool decode_simple_mode(MppDecoderImpl *impl, const uint8_t *data, size_t
     frame.hor_stride = mpp_frame_get_hor_stride(mpp_frame);
     frame.ver_stride = mpp_frame_get_ver_stride(mpp_frame);
 
-    LOG_DEBUG("Decoded frame: {}x{} stride={}x{} fd={}", 
-        frame.width, frame.height, frame.hor_stride, frame.ver_stride, frame.fd);
+    LOG_DEBUG(
+        "Decoded frame: {}x{} stride={}x{} fd={}",
+        frame.width,
+        frame.height,
+        frame.hor_stride,
+        frame.ver_stride,
+        frame.fd
+    );
 
     // 保存帧引用，下次调用时释放
     if (impl->simple_frame) {
@@ -448,19 +508,25 @@ static bool decode_simple_mode(MppDecoderImpl *impl, const uint8_t *data, size_t
     return true;
 }
 
-bool MppDecoder::decode(
-    const uint8_t *data,
-    size_t size,
-    DecodedFrame &frame
-) {
+bool MppDecoder::decode(const uint8_t *data, size_t size, DecodedFrame &frame)
+{
     if (!m_initialized || !m_impl) {
         return false;
     }
 
     auto *impl = static_cast<MppDecoderImpl *>(m_impl);
-    
+
     if (impl->use_simple_api) {
-        return decode_simple_mode(impl, data, size, frame, m_width, m_height, m_hor_stride, m_ver_stride);
+        return decode_simple_mode(
+            impl,
+            data,
+            size,
+            frame,
+            m_width,
+            m_height,
+            m_hor_stride,
+            m_ver_stride
+        );
     } else {
         return decode_task_mode(impl, data, size, frame);
     }

@@ -13,7 +13,10 @@ class StdinCommandHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit StdinCommandHandler(MainWindow *main_window, QObject *parent = nullptr);
+    explicit StdinCommandHandler(
+        MainWindow *main_window,
+        QObject *parent = nullptr
+    );
     ~StdinCommandHandler();
 
 signals:
@@ -24,7 +27,7 @@ private slots:
 
 private:
     void process_command(const QString &cmd);
-    
+
     MainWindow *m_main_window;
     QSocketNotifier *m_stdin_notifier;
 };

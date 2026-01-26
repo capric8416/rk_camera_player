@@ -2,9 +2,9 @@
 #define MAIN_WINDOW_H
 
 #include <QMainWindow>
-#include <QTranslator>
-#include <QTimer>
 #include <QStringList>
+#include <QTimer>
+#include <QTranslator>
 
 #include "player_thread.hpp"
 
@@ -40,9 +40,13 @@ private slots:
     void handle_camera_disconnected();
     void handle_back_clicked();
     void check_camera_status();
-    
+
     // 视频播放相关
-    void start_video_playback(const QString &video_path, const QStringList &video_list, int index);
+    void start_video_playback(
+        const QString &video_path,
+        const QStringList &video_list,
+        int index
+    );
     void stop_video_playback();
     void toggle_video_play_pause();
     void play_previous_video();
@@ -55,7 +59,7 @@ private:
     void load_translation();
     double parse_fps_from_meta(const QString &video_path);
     uint32_t parse_frames_from_meta(const QString &video_path);
-    
+
     Ui::MainWindow *ui;
     QTranslator *m_translator;
     QTimer *m_camera_check_timer;
@@ -63,7 +67,7 @@ private:
     PlayerThread *m_player_thread;
     PlayerThread *m_file_player_thread;
     StdinCommandHandler *m_stdin_handler;
-    
+
     // 视频播放状态
     QStringList m_video_list;
     int m_current_video_index;

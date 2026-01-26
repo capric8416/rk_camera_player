@@ -2,12 +2,12 @@
 
 /**
  * IPlayer - 播放器接口基类
- * 
+ *
  * 定义播放器的通用接口，供 CameraPlayer 和 VideoPlayer 实现
  */
 
-#include <string>
 #include <cstdint>
+#include <string>
 #include "mpp_encode.hpp"
 
 namespace player {
@@ -15,7 +15,8 @@ namespace player {
 /**
  * 播放器配置
  */
-struct PlayerConfig {
+struct PlayerConfig
+{
     std::string camera_device = "/dev/video51";
     std::string drm_device = "/dev/dri/card0";
     std::string images_dir_path = "images";
@@ -26,7 +27,7 @@ struct PlayerConfig {
     uint32_t fps = 30;
     int zpos = 0;
     uint32_t plane_id = 0;
-    
+
     // 视频编码参数
     uint32_t video_bitrate = 4000000;
     uint32_t video_gop = 30;
@@ -37,7 +38,8 @@ struct PlayerConfig {
 /**
  * 播放器接口
  */
-class IPlayer {
+class IPlayer
+{
 public:
     virtual ~IPlayer() = default;
 

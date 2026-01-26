@@ -1,8 +1,8 @@
 #include "rga_scale.hpp"
 #include "logger.hpp"
 
-#include <rga/im2d.h>
 #include <rga/RgaUtils.h>
+#include <rga/im2d.h>
 
 namespace player {
 
@@ -15,35 +15,39 @@ RgaScaler::RgaScaler()
 {
 }
 
-RgaScaler::~RgaScaler() {
-    destroy();
-}
+RgaScaler::~RgaScaler() { destroy(); }
 
 bool RgaScaler::init(
     uint32_t src_width,
     uint32_t src_height,
     uint32_t dst_width,
     uint32_t dst_height
-) {
+)
+{
     m_src_width = src_width;
     m_src_height = src_height;
     m_dst_width = dst_width;
     m_dst_height = dst_height;
     m_initialized = true;
 
-    LOG_INFO("RGA 初始化: {}x{} -> {}x{}", m_src_width, m_src_height, m_dst_width, m_dst_height);
+    LOG_INFO(
+        "RGA 初始化: {}x{} -> {}x{}",
+        m_src_width,
+        m_src_height,
+        m_dst_width,
+        m_dst_height
+    );
     return true;
 }
 
-void RgaScaler::destroy() {
-    m_initialized = false;
-}
+void RgaScaler::destroy() { m_initialized = false; }
 
 bool RgaScaler::convert(
     const DecodedFrame &src,
     void *dst_data,
     size_t dst_size
-) {
+)
+{
     if (!m_initialized) {
         return false;
     }
@@ -57,7 +61,7 @@ bool RgaScaler::convert(
     src_buf.height = static_cast<int>(src.height);
     src_buf.wstride = static_cast<int>(src.hor_stride);
     src_buf.hstride = static_cast<int>(src.ver_stride);
-    src_buf.format = RK_FORMAT_YCbCr_420_SP;  // NV12
+    src_buf.format = RK_FORMAT_YCbCr_420_SP; // NV12
 
     // 设置目标图像 (RGBA)
     rga_buffer_t dst_buf = {};
@@ -69,12 +73,8 @@ bool RgaScaler::convert(
     dst_buf.format = RK_FORMAT_RGBA_8888;
 
     // 执行颜色空间转换
-    IM_STATUS status = imcvtcolor(
-        src_buf,
-        dst_buf,
-        src_buf.format,
-        dst_buf.format
-    );
+    IM_STATUS status =
+        imcvtcolor(src_buf, dst_buf, src_buf.format, dst_buf.format);
 
     if (status != IM_STATUS_SUCCESS) {
         LOG_ERROR("RGA imcvtcolor 失败: {}", imStrError(status));

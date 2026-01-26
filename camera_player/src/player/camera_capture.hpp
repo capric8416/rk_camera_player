@@ -10,7 +10,8 @@
 
 namespace player {
 
-class CameraCapture {
+class CameraCapture
+{
 public:
     CameraCapture();
     ~CameraCapture();
@@ -36,10 +37,7 @@ public:
      * @param size 输出帧数据大小
      * @return 成功返回 true
      */
-    bool capture_frame(
-        uint8_t **data,
-        size_t *size
-    );
+    bool capture_frame(uint8_t **data, size_t *size);
 
     /**
      * 释放当前帧
@@ -51,7 +49,8 @@ public:
     uint32_t fps() const { return m_fps; }
 
 private:
-    struct Buffer {
+    struct Buffer
+    {
         void *addr;
         size_t size;
     };

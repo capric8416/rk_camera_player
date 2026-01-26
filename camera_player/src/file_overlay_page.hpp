@@ -1,11 +1,11 @@
 #ifndef FILE_OVERLAY_PAGE_H
 #define FILE_OVERLAY_PAGE_H
 
-#include <QWidget>
-#include <QTimer>
 #include <QElapsedTimer>
-#include <QStringList>
 #include <QPushButton>
+#include <QStringList>
+#include <QTimer>
+#include <QWidget>
 
 namespace Ui {
 class FileOverlayPage;
@@ -13,7 +13,7 @@ class FileOverlayPage;
 
 /**
  * FileOverlayPage - 文件播放叠加页面
- * 
+ *
  * 显示播放时间和文件名
  * 支持双击播放/暂停，长按弹出菜单，上下滑动切换视频
  */

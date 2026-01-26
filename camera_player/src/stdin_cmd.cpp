@@ -1,31 +1,37 @@
 #include "stdin_cmd.hpp"
-#include "main_window.hpp"
-#include "player/logger.hpp"
+#include <unistd.h>
+#include <QCoreApplication>
 #include <QSocketNotifier>
 #include <QTextStream>
-#include <QCoreApplication>
-#include <unistd.h>
+#include "main_window.hpp"
+#include "player/logger.hpp"
 
-StdinCommandHandler::StdinCommandHandler(MainWindow *main_window, QObject *parent)
+StdinCommandHandler::StdinCommandHandler(
+    MainWindow *main_window,
+    QObject *parent
+)
     : QObject(parent)
     , m_main_window(main_window)
     , m_stdin_notifier(nullptr)
 {
-    m_stdin_notifier = new QSocketNotifier(STDIN_FILENO, QSocketNotifier::Read, this);
-    connect(m_stdin_notifier, &QSocketNotifier::activated,
-            this, &StdinCommandHandler::on_stdin_ready);
+    m_stdin_notifier =
+        new QSocketNotifier(STDIN_FILENO, QSocketNotifier::Read, this);
+    connect(
+        m_stdin_notifier,
+        &QSocketNotifier::activated,
+        this,
+        &StdinCommandHandler::on_stdin_ready
+    );
     LOG_INFO("Stdin command listener started. Type 'help' for commands.");
 }
 
-StdinCommandHandler::~StdinCommandHandler()
-{
-}
+StdinCommandHandler::~StdinCommandHandler() {}
 
 void StdinCommandHandler::on_stdin_ready()
 {
     QTextStream stream(stdin);
     QString line = stream.readLine().trimmed();
-    
+
     if (!line.isEmpty()) {
         process_command(line);
         emit command_received(line);
@@ -35,7 +41,7 @@ void StdinCommandHandler::on_stdin_ready()
 void StdinCommandHandler::process_command(const QString &cmd)
 {
     LOG_INFO("Command received: {}", cmd.toStdString());
-    
+
     if (cmd == "start_camera") {
         m_main_window->start_camera();
         LOG_INFO("Camera started");
@@ -68,6 +74,9 @@ void StdinCommandHandler::process_command(const QString &cmd)
         LOG_INFO("  quit/exit           - Exit application");
         LOG_INFO("  help                - Show this help");
     } else {
-        LOG_WARN("Unknown command: {}. Type 'help' for available commands.", cmd.toStdString());
+        LOG_WARN(
+            "Unknown command: {}. Type 'help' for available commands.",
+            cmd.toStdString()
+        );
     }
 }

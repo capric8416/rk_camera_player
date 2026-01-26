@@ -1,14 +1,14 @@
 #include "launcher_page.hpp"
-#include "ui_launcher_page.h"
-#include "player/logger.hpp"
 #include <QDateTime>
-#include <QPixmap>
-#include <QTransform>
-#include <QPalette>
-#include <QPainter>
+#include <QDebug>
 #include <QEvent>
 #include <QMouseEvent>
-#include <QDebug>
+#include <QPainter>
+#include <QPalette>
+#include <QPixmap>
+#include <QTransform>
+#include "player/logger.hpp"
+#include "ui_launcher_page.h"
 
 static const QString BATTERY_ICON_PATH[] = {
     ":/resources/icon/battery_0.png",
@@ -31,20 +31,25 @@ LauncherPage::LauncherPage(QWidget *parent)
     , m_date_time_timer(new QTimer(this))
 {
     ui->setupUi(this);
-    
+
     load_icons();
-    
+
     // 设置定时器更新时间
     update_date_time();
-    connect(m_date_time_timer, &QTimer::timeout, this, &LauncherPage::update_date_time);
+    connect(
+        m_date_time_timer,
+        &QTimer::timeout,
+        this,
+        &LauncherPage::update_date_time
+    );
     m_date_time_timer->start(1000);
-    
+
     // 为图标安装事件过滤器以支持点击
     ui->backIcon->installEventFilter(this);
     ui->galleryIcon->installEventFilter(this);
     ui->videosIcon->installEventFilter(this);
     ui->settingsIcon->installEventFilter(this);
-    
+
     // 设置鼠标光标为手型
     ui->backIcon->setCursor(Qt::PointingHandCursor);
     ui->galleryIcon->setCursor(Qt::PointingHandCursor);
@@ -52,10 +57,7 @@ LauncherPage::LauncherPage(QWidget *parent)
     ui->settingsIcon->setCursor(Qt::PointingHandCursor);
 }
 
-LauncherPage::~LauncherPage()
-{
-    delete ui;
-}
+LauncherPage::~LauncherPage() { delete ui; }
 
 void LauncherPage::load_icons()
 {
@@ -64,35 +66,52 @@ void LauncherPage::load_icons()
     if (!batteryPixmap.isNull()) {
         QTransform transform;
         transform.rotate(90);
-        QPixmap rotatedBattery = batteryPixmap.transformed(transform, Qt::SmoothTransformation);
-        ui->launcherBatteryIcon->setPixmap(rotatedBattery.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        QPixmap rotatedBattery =
+            batteryPixmap.transformed(transform, Qt::SmoothTransformation);
+        ui->launcherBatteryIcon->setPixmap(
+            rotatedBattery
+                .scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation)
+        );
     }
-    
+
     // 加载启动器图标
     QPixmap galleryPixmap(LAUNCHER_ICON_PATH[0]);
     if (!galleryPixmap.isNull()) {
-        ui->galleryIcon->setPixmap(galleryPixmap.scaled(160, 160, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui->galleryIcon->setPixmap(
+            galleryPixmap
+                .scaled(160, 160, Qt::KeepAspectRatio, Qt::SmoothTransformation)
+        );
     }
-    
+
     QPixmap videosPixmap(LAUNCHER_ICON_PATH[1]);
     if (!videosPixmap.isNull()) {
-        ui->videosIcon->setPixmap(videosPixmap.scaled(160, 160, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui->videosIcon->setPixmap(
+            videosPixmap
+                .scaled(160, 160, Qt::KeepAspectRatio, Qt::SmoothTransformation)
+        );
     }
-    
+
     QPixmap settingsPixmap(LAUNCHER_ICON_PATH[2]);
     if (!settingsPixmap.isNull()) {
-        ui->settingsIcon->setPixmap(settingsPixmap.scaled(160, 160, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui->settingsIcon->setPixmap(
+            settingsPixmap
+                .scaled(160, 160, Qt::KeepAspectRatio, Qt::SmoothTransformation)
+        );
     }
-    
+
     QPixmap backPixmap(LAUNCHER_ICON_PATH[3]);
     if (!backPixmap.isNull()) {
-        ui->backIcon->setPixmap(backPixmap.scaled(160, 160, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui->backIcon->setPixmap(
+            backPixmap
+                .scaled(160, 160, Qt::KeepAspectRatio, Qt::SmoothTransformation)
+        );
     }
 }
 
 void LauncherPage::update_date_time()
 {
-    QString dateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+    QString dateTime =
+        QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
     ui->launcherDateTimeLabel->setText(dateTime);
 }
 

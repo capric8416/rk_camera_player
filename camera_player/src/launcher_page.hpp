@@ -1,8 +1,8 @@
 #ifndef LAUNCHER_PAGE_H
 #define LAUNCHER_PAGE_H
 
-#include <QWidget>
 #include <QTimer>
+#include <QWidget>
 
 namespace Ui {
 class LauncherPage;

@@ -2,26 +2,27 @@
 
 /**
  * CameraPlayer - 相机播放器
- * 
+ *
  * 管理 CameraCapture, MppDecoder, DrmDisplay, MppEncoder
  * 实现 IPlayer 接口
  */
 
-#include "i_player.hpp"
 #include "camera_capture.hpp"
+#include "drm_display.hpp"
+#include "i_player.hpp"
 #include "mpp_decode.hpp"
 #include "mpp_encode.hpp"
-#include "drm_display.hpp"
 
 #include <atomic>
-#include <string>
-#include <memory>
-#include <vector>
 #include <chrono>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace player {
 
-class CameraPlayer : public IPlayer {
+class CameraPlayer : public IPlayer
+{
 public:
     CameraPlayer();
     ~CameraPlayer() override;
@@ -44,19 +45,13 @@ private:
     /**
      * 查找 JPEG 结束标记
      */
-    static size_t find_jpeg_size(
-        const uint8_t *data,
-        size_t length
-    );
-    
+    static size_t find_jpeg_size(const uint8_t *data, size_t length);
+
     /**
      * 保存捕获的图片到文件
      */
-    void save_captured_image(
-        const uint8_t *jpeg_data,
-        size_t jpeg_size
-    );
-    
+    void save_captured_image(const uint8_t *jpeg_data, size_t jpeg_size);
+
     /**
      * 编码一帧视频
      */
@@ -66,14 +61,14 @@ private:
     MppDecoder m_decoder;
     MppEncoder m_encoder;
     DrmDisplay m_display;
-    
+
     std::atomic<bool> m_running;
     std::atomic<bool> m_device_lost;
     std::atomic<bool> m_capture_image_requested;
     std::atomic<bool> m_video_capturing;
     std::atomic<bool> m_start_video_requested;
     std::atomic<bool> m_stop_video_requested;
-    
+
     uint32_t m_frame_count;
     PlayerConfig m_config;
     std::string m_images_dir_path;

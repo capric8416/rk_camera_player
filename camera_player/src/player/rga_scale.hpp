@@ -4,13 +4,14 @@
  * RgaScaler - RGA 颜色空间转换/缩放
  */
 
-#include "mpp_decode.hpp"
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
+#include "mpp_decode.hpp"
 
 namespace player {
 
-class RgaScaler {
+class RgaScaler
+{
 public:
     RgaScaler();
     ~RgaScaler();
@@ -34,11 +35,7 @@ public:
      * @param dst_size 目标缓冲区大小
      * @return 成功返回 true
      */
-    bool convert(
-        const DecodedFrame &src,
-        void *dst_data,
-        size_t dst_size
-    );
+    bool convert(const DecodedFrame &src, void *dst_data, size_t dst_size);
 
 private:
     uint32_t m_src_width;

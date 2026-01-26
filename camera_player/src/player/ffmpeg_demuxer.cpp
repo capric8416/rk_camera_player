@@ -2,9 +2,9 @@
 #include "logger.hpp"
 
 extern "C" {
-#include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavcodec/bsf.h>
+#include <libavformat/avformat.h>
 #include <libavutil/error.h>
 }
 
@@ -24,11 +24,10 @@ FFmpegDemuxer::FFmpegDemuxer()
 {
 }
 
-FFmpegDemuxer::~FFmpegDemuxer() {
-    close();
-}
+FFmpegDemuxer::~FFmpegDemuxer() { close(); }
 
-bool FFmpegDemuxer::open(const std::string& path) {
+bool FFmpegDemuxer::open(const std::string &path)
+{
     if (m_fmt_ctx) {
         LOG_WARN("Demuxer already opened");
         return false;
@@ -67,8 +66,8 @@ bool FFmpegDemuxer::open(const std::string& path) {
         return false;
     }
 
-    AVCodecParameters* param = m_video_stream->codecpar;
-    
+    AVCodecParameters *param = m_video_stream->codecpar;
+
     // 获取视频信息
     m_width = param->width;
     m_height = param->height;
@@ -77,10 +76,12 @@ bool FFmpegDemuxer::open(const std::string& path) {
     } else {
         m_fps = 30.0; // 默认
     }
-    
+
     // 计算时长 (ms)
     if (m_video_stream->duration != AV_NOPTS_VALUE) {
-        m_duration_ms = static_cast<int64_t>(m_video_stream->duration * av_q2d(m_video_stream->time_base) * 1000);
+        m_duration_ms = static_cast<int64_t>(
+            m_video_stream->duration * av_q2d(m_video_stream->time_base) * 1000
+        );
     } else if (m_fmt_ctx->duration != AV_NOPTS_VALUE) {
         m_duration_ms = m_fmt_ctx->duration / 1000;
     }
@@ -91,7 +92,10 @@ bool FFmpegDemuxer::open(const std::string& path) {
     } else if (param->codec_id == AV_CODEC_ID_H264) {
         m_is_hevc = false;
     } else {
-        LOG_ERROR("Unsupported codec ID: {}", static_cast<int>(param->codec_id));
+        LOG_ERROR(
+            "Unsupported codec ID: {}",
+            static_cast<int>(param->codec_id)
+        );
         close();
         return false;
     }
@@ -110,15 +114,23 @@ bool FFmpegDemuxer::open(const std::string& path) {
         return false;
     }
 
-    LOG_INFO("Demuxer opened: {} ({}x{} {:.2f}fps {})", 
-        path, m_width, m_height, m_fps, m_is_hevc ? "HEVC" : "H264");
+    LOG_INFO(
+        "Demuxer opened: {} ({}x{} {:.2f}fps {})",
+        path,
+        m_width,
+        m_height,
+        m_fps,
+        m_is_hevc ? "HEVC" : "H264"
+    );
 
     return true;
 }
 
-bool FFmpegDemuxer::init_bsf() {
-    const char* filter_name = m_is_hevc ? "hevc_mp4toannexb" : "h264_mp4toannexb";
-    const AVBitStreamFilter* bsf = av_bsf_get_by_name(filter_name);
+bool FFmpegDemuxer::init_bsf()
+{
+    const char *filter_name =
+        m_is_hevc ? "hevc_mp4toannexb" : "h264_mp4toannexb";
+    const AVBitStreamFilter *bsf = av_bsf_get_by_name(filter_name);
     if (!bsf) {
         LOG_ERROR("Could not find bitstream filter: {}", filter_name);
         return false;
@@ -146,7 +158,8 @@ bool FFmpegDemuxer::init_bsf() {
     return true;
 }
 
-void FFmpegDemuxer::close() {
+void FFmpegDemuxer::close()
+{
     if (m_bsf_ctx) {
         av_bsf_free(&m_bsf_ctx);
         m_bsf_ctx = nullptr;
@@ -166,26 +179,36 @@ void FFmpegDemuxer::close() {
     m_video_stream_index = -1;
 }
 
-bool FFmpegDemuxer::seek(double seconds) {
-    if (!m_fmt_ctx || m_video_stream_index < 0) return false;
+bool FFmpegDemuxer::seek(double seconds)
+{
+    if (!m_fmt_ctx || m_video_stream_index < 0)
+        return false;
 
-    int64_t timestamp = static_cast<int64_t>(seconds / av_q2d(m_video_stream->time_base));
-    int ret = av_seek_frame(m_fmt_ctx, m_video_stream_index, timestamp, AVSEEK_FLAG_BACKWARD);
+    int64_t timestamp =
+        static_cast<int64_t>(seconds / av_q2d(m_video_stream->time_base));
+    int ret = av_seek_frame(
+        m_fmt_ctx,
+        m_video_stream_index,
+        timestamp,
+        AVSEEK_FLAG_BACKWARD
+    );
     if (ret < 0) {
         LOG_WARN("Seek failed: {}", ret);
         return false;
     }
-    
+
     // Seek 后需要 flush BSF
     if (m_bsf_ctx) {
         av_bsf_flush(m_bsf_ctx);
     }
-    
+
     return true;
 }
 
-bool FFmpegDemuxer::read_packet(std::vector<uint8_t>& data, int64_t& pts) {
-    if (!m_fmt_ctx || !m_bsf_ctx || !m_packet) return false;
+bool FFmpegDemuxer::read_packet(std::vector<uint8_t> &data, int64_t &pts)
+{
+    if (!m_fmt_ctx || !m_bsf_ctx || !m_packet)
+        return false;
 
     data.clear();
     int ret;
@@ -197,7 +220,7 @@ bool FFmpegDemuxer::read_packet(std::vector<uint8_t>& data, int64_t& pts) {
             // 成功获取
             data.assign(m_packet->data, m_packet->data + m_packet->size);
             pts = m_packet->pts; // 这里保留原始 TimeBase 的 pts
-            
+
             // LOG_TRACE("Read packet: size={}, pts={}", data.size(), pts);
             av_packet_unref(m_packet);
             return true;
@@ -207,9 +230,9 @@ bool FFmpegDemuxer::read_packet(std::vector<uint8_t>& data, int64_t& pts) {
             // BSF 错误或 EOF（如果是 EOF 且 drain 完毕）
             if (ret == AVERROR_EOF) {
                 // 如果 BSF 输出完毕，我们还需要检查文件是否还有新数据
-                // 但通常 loop 会在 av_read_frame 返回 EOF 后发送 null packet 到 BSF
-                // 导致 BSF 最终也返回 EOF
-                // LOG_DEBUG("av_bsf_receive_packet EOF");
+                // 但通常 loop 会在 av_read_frame 返回 EOF 后发送 null packet 到
+                // BSF 导致 BSF 最终也返回 EOF LOG_DEBUG("av_bsf_receive_packet
+                // EOF");
                 return false;
             }
             LOG_ERROR("av_bsf_receive_packet error: {}", ret);
@@ -225,7 +248,7 @@ bool FFmpegDemuxer::read_packet(std::vector<uint8_t>& data, int64_t& pts) {
                 av_bsf_send_packet(m_bsf_ctx, nullptr);
                 LOG_DEBUG("av_read_frame EOF, flushing BSF");
                 // 继续循环以获取 BSF 中剩余的数据
-                continue; 
+                continue;
             }
             LOG_ERROR("av_read_frame error: {}", ret);
             return false;
@@ -241,9 +264,10 @@ bool FFmpegDemuxer::read_packet(std::vector<uint8_t>& data, int64_t& pts) {
                 return false;
             }
         } else {
-            // LOG_DEBUG("Skipping non-video packet stream={}", m_packet->stream_index);
+            // LOG_DEBUG("Skipping non-video packet stream={}",
+            // m_packet->stream_index);
         }
-        
+
         // 无论是否发送成功（或非视频包），都要释放原始包
         av_packet_unref(m_packet);
     }

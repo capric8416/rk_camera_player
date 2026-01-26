@@ -9,10 +9,10 @@
  * - 自动进行 bitstream filter 转换 (MP4/AVCC -> Annex-B) 以适配 MPP 解码器
  */
 
-#include <string>
-#include <vector>
 #include <cstdint>
 #include <memory>
+#include <string>
+#include <vector>
 
 // Forward declarations for FFmpeg structs
 struct AVFormatContext;
@@ -22,21 +22,22 @@ struct AVBSFContext;
 
 namespace player {
 
-class FFmpegDemuxer {
+class FFmpegDemuxer
+{
 public:
     FFmpegDemuxer();
     ~FFmpegDemuxer();
 
     // 禁止拷贝
-    FFmpegDemuxer(const FFmpegDemuxer&) = delete;
-    FFmpegDemuxer& operator=(const FFmpegDemuxer&) = delete;
+    FFmpegDemuxer(const FFmpegDemuxer &) = delete;
+    FFmpegDemuxer &operator=(const FFmpegDemuxer &) = delete;
 
     /**
      * 打开媒体文件
      * @param path 文件路径
      * @return 成功返回 true
      */
-    bool open(const std::string& path);
+    bool open(const std::string &path);
 
     /**
      * 关闭文件
@@ -46,10 +47,11 @@ public:
     /**
      * 读取下一个视频包 (自动转换为 Annex-B 格式)
      * @param data 输出数据缓冲区
-     * @param pts 输出 PTS (微秒 or pure counter depending on stream, usually outputting user readable time is better but here pass through)
+     * @param pts 输出 PTS (微秒 or pure counter depending on stream, usually
+     * outputting user readable time is better but here pass through)
      * @return 成功读取返回 true，EOF 或错误返回 false
      */
-    bool read_packet(std::vector<uint8_t>& data, int64_t& pts);
+    bool read_packet(std::vector<uint8_t> &data, int64_t &pts);
 
     /**
      * Seek 到指定时间 (秒)
@@ -66,11 +68,11 @@ public:
 private:
     bool init_bsf();
 
-    AVFormatContext* m_fmt_ctx;
+    AVFormatContext *m_fmt_ctx;
     int m_video_stream_index;
-    AVStream* m_video_stream;
-    AVPacket* m_packet;
-    AVBSFContext* m_bsf_ctx;  // Bitstream Filter Context
+    AVStream *m_video_stream;
+    AVPacket *m_packet;
+    AVBSFContext *m_bsf_ctx; // Bitstream Filter Context
 
     int m_width;
     int m_height;

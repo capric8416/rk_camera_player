@@ -1,13 +1,13 @@
 #include "camera_capture.hpp"
 #include "logger.hpp"
 
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <linux/videodev2.h>
 #include <cerrno>
 #include <cstring>
+#include <fcntl.h>
+#include <linux/videodev2.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <unistd.h>
 
 namespace player {
 
@@ -21,16 +21,15 @@ CameraCapture::CameraCapture()
 {
 }
 
-CameraCapture::~CameraCapture() {
-    close();
-}
+CameraCapture::~CameraCapture() { close(); }
 
 bool CameraCapture::open(
     const std::string &device,
     uint32_t width,
     uint32_t height,
     uint32_t fps
-) {
+)
+{
     m_fd = ::open(device.c_str(), O_RDWR);
     if (m_fd < 0) {
         LOG_ERROR("无法打开摄像头 {}: {}", device, strerror(errno));
@@ -57,8 +56,11 @@ bool CameraCapture::open(
         return false;
     }
 
-    LOG_INFO("摄像头: {} ({})", reinterpret_cast<const char *>(cap.card),
-             reinterpret_cast<const char *>(cap.driver));
+    LOG_INFO(
+        "摄像头: {} ({})",
+        reinterpret_cast<const char *>(cap.card),
+        reinterpret_cast<const char *>(cap.driver)
+    );
 
     // 设置格式 (MJPEG)
     struct v4l2_format fmt = {};
@@ -138,7 +140,8 @@ bool CameraCapture::open(
     return true;
 }
 
-void CameraCapture::close() {
+void CameraCapture::close()
+{
     stop_streaming();
 
     for (auto &buf : m_buffers) {
@@ -154,7 +157,8 @@ void CameraCapture::close() {
     }
 }
 
-bool CameraCapture::start_streaming() {
+bool CameraCapture::start_streaming()
+{
     if (m_streaming) {
         return true;
     }
@@ -183,7 +187,8 @@ bool CameraCapture::start_streaming() {
     return true;
 }
 
-void CameraCapture::stop_streaming() {
+void CameraCapture::stop_streaming()
+{
     if (!m_streaming) {
         return;
     }
@@ -193,10 +198,8 @@ void CameraCapture::stop_streaming() {
     m_streaming = false;
 }
 
-bool CameraCapture::capture_frame(
-    uint8_t **data,
-    size_t *size
-) {
+bool CameraCapture::capture_frame(uint8_t **data, size_t *size)
+{
     if (!m_streaming) {
         return false;
     }
@@ -217,7 +220,8 @@ bool CameraCapture::capture_frame(
     return true;
 }
 
-void CameraCapture::release_frame() {
+void CameraCapture::release_frame()
+{
     if (m_current_buffer_index < 0) {
         return;
     }

@@ -1,16 +1,16 @@
 #ifndef GALLERY_PAGE_H
 #define GALLERY_PAGE_H
 
-#include <QWidget>
-#include <QScrollArea>
+#include <QElapsedTimer>
+#include <QFileInfoList>
 #include <QGridLayout>
 #include <QLabel>
-#include <QPushButton>
 #include <QList>
+#include <QPushButton>
+#include <QScrollArea>
 #include <QString>
 #include <QTimer>
-#include <QFileInfoList>
-#include <QElapsedTimer>
+#include <QWidget>
 
 namespace Ui {
 class GalleryPage;
@@ -27,12 +27,12 @@ class GalleryPage : public QWidget
 public:
     explicit GalleryPage(QWidget *parent = nullptr);
     ~GalleryPage();
-    
+
     /**
      * 设置图片目录路径
      */
     void set_images_directory(const QString &path);
-    
+
     /**
      * 刷新图片列表
      */
@@ -68,37 +68,37 @@ private:
     void show_action_menu();
     void hide_action_menu();
     void delete_current_image();
-    
+
     Ui::GalleryPage *ui;
-    
+
     // 全屏预览
     QLabel *m_fullscreen_label;
     QLabel *m_fullscreen_name_label;
     bool m_fullscreen_visible;
     int m_current_image_index;
-    
+
     // 操作菜单
     QWidget *m_action_menu;
     QPushButton *m_return_btn;
     QPushButton *m_delete_btn;
-    
+
     // 删除确认菜单
     QWidget *m_confirm_menu;
-    
+
     // 数据
     QString m_images_dir;
     QFileInfoList m_pending_files;
     QList<QString> m_loaded_files;
     int m_current_row;
-    
+
     // 延迟加载定时器
     QTimer *m_load_timer;
-    
+
     // 触摸检测 - 区分滑动和点击
     QPoint m_press_pos;
     QElapsedTimer m_press_time;
     QTimer *m_long_press_timer;
-    
+
     static constexpr int COLUMNS = 3;
     static constexpr int THUMBNAIL_SIZE = 400;
     static constexpr int LOAD_DELAY_MS = 16;

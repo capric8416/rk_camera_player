@@ -2,27 +2,28 @@
 
 /**
  * FilePlayer - 文件播放器
- * 
+ *
  * 播放本地 H.264/H.265 视频文件
  * 实现 IPlayer 接口
  */
 
-#include "i_player.hpp"
-#include "mpp_decode.hpp"
 #include "drm_display.hpp"
 #include "ffmpeg_demuxer.hpp"
+#include "i_player.hpp"
+#include "mpp_decode.hpp"
 
 #include <atomic>
-#include <string>
-#include <memory>
-#include <vector>
 #include <chrono>
 #include <condition_variable>
+#include <memory>
 #include <mutex>
+#include <string>
+#include <vector>
 
 namespace player {
 
-class FilePlayer : public IPlayer {
+class FilePlayer : public IPlayer
+{
 public:
     FilePlayer();
     ~FilePlayer() override;
@@ -35,7 +36,7 @@ public:
     bool init(const PlayerConfig &config) override;
     void run() override;
     void stop() override;
-    
+
     // FilePlayer 不支持拍照和录像，返回空/false
     std::string capture_image() override { return ""; }
     bool start_video_capture() override { return false; }
@@ -47,10 +48,10 @@ public:
     void pause();
     void resume();
     bool is_paused() const { return m_paused; }
-    
+
     // 设置初始状态为暂停（显示首帧后暂停）
     void set_start_paused(bool paused) { m_start_paused = paused; }
-    
+
     // 设置从 meta 文件解析的 fps 和总帧数 (对于 MP4，优先使用文件内信息)
     void set_meta_info(double fps, uint32_t total_frames);
 
@@ -92,14 +93,14 @@ private:
     std::atomic<bool> m_eof_reached;
     std::atomic<bool> m_paused;
     bool m_start_paused;
-    
+
     // 暂停/恢复同步
     std::mutex m_pause_mutex;
     std::condition_variable m_pause_cv;
-    
+
     uint32_t m_frame_count;
     double m_fps;
-    double m_meta_fps;          // 来自 meta 的 fps
+    double m_meta_fps;            // 来自 meta 的 fps
     uint32_t m_meta_total_frames; // 来自 meta 的总帧数
 };
 

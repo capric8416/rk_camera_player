@@ -1,15 +1,15 @@
 #include "drm_display.hpp"
 #include "logger.hpp"
 
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/mman.h>
-#include <sys/ioctl.h>
 #include <cstring>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <unistd.h>
 
+#include <drm_fourcc.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
-#include <drm_fourcc.h>
 
 namespace player {
 
@@ -28,11 +28,10 @@ DrmDisplay::DrmDisplay()
     memset(m_buffers, 0, sizeof(m_buffers));
 }
 
-DrmDisplay::~DrmDisplay() {
-    close();
-}
+DrmDisplay::~DrmDisplay() { close(); }
 
-bool DrmDisplay::open(const std::string &device) {
+bool DrmDisplay::open(const std::string &device)
+{
     m_fd = ::open(device.c_str(), O_RDWR | O_CLOEXEC);
     if (m_fd < 0) {
         LOG_ERROR("无法打开 DRM: {}", device);
@@ -48,7 +47,8 @@ bool DrmDisplay::init(
     uint32_t video_height,
     int zpos,
     uint32_t plane_id
-) {
+)
+{
     // 查找活动 CRTC
     drmModeRes *res = drmModeGetResources(m_fd);
     if (!res) {
@@ -63,11 +63,17 @@ bool DrmDisplay::init(
             m_crtc_index = i;
             m_display_width = crtc->mode.hdisplay;
             m_display_height = crtc->mode.vdisplay;
-            LOG_INFO("DRM CRTC: {} ({}x{})", m_crtc_id, m_display_width, m_display_height);
+            LOG_INFO(
+                "DRM CRTC: {} ({}x{})",
+                m_crtc_id,
+                m_display_width,
+                m_display_height
+            );
             drmModeFreeCrtc(crtc);
             break;
         }
-        if (crtc) drmModeFreeCrtc(crtc);
+        if (crtc)
+            drmModeFreeCrtc(crtc);
     }
     drmModeFreeResources(res);
 
@@ -89,13 +95,15 @@ bool DrmDisplay::init(
     } else {
         for (uint32_t i = 0; i < pres->count_planes; ++i) {
             drmModePlane *p = drmModeGetPlane(m_fd, pres->planes[i]);
-            if (p && (p->possible_crtcs & (1 << m_crtc_index)) && p->crtc_id == 0) {
+            if (p && (p->possible_crtcs & (1 << m_crtc_index)) &&
+                p->crtc_id == 0) {
                 m_plane_id = p->plane_id;
                 LOG_INFO("Overlay plane: {}", m_plane_id);
                 drmModeFreePlane(p);
                 break;
             }
-            if (p) drmModeFreePlane(p);
+            if (p)
+                drmModeFreePlane(p);
         }
     }
     drmModeFreePlaneResources(pres);
@@ -110,7 +118,12 @@ bool DrmDisplay::init(
 
     // 创建双缓冲
     for (int i = 0; i < 2; ++i) {
-        if (!create_buffer(m_video_width, m_video_height, DRM_FORMAT_ABGR8888, m_buffers[i])) {
+        if (!create_buffer(
+                m_video_width,
+                m_video_height,
+                DRM_FORMAT_ABGR8888,
+                m_buffers[i]
+            )) {
             LOG_ERROR("创建 DRM buffer 失败");
             return false;
         }
@@ -129,8 +142,17 @@ bool DrmDisplay::init(
         for (uint32_t i = 0; i < pres2->count_planes; ++i) {
             uint32_t other_plane = pres2->planes[i];
             if (other_plane != m_plane_id) {
-                if (set_property(other_plane, DRM_MODE_OBJECT_PLANE, "zpos", zpos + 1) == 0) {
-                    LOG_INFO("设置 plane {} zpos={} (前景)", other_plane, zpos + 1);
+                if (set_property(
+                        other_plane,
+                        DRM_MODE_OBJECT_PLANE,
+                        "zpos",
+                        zpos + 1
+                    ) == 0) {
+                    LOG_INFO(
+                        "设置 plane {} zpos={} (前景)",
+                        other_plane,
+                        zpos + 1
+                    );
                 }
             }
         }
@@ -144,8 +166,14 @@ bool DrmDisplay::init(
         m_crtc_id,
         m_buffers[0].fb_id,
         0,
-        0, 0, m_display_width, m_display_height,
-        0, 0, m_video_width << 16, m_video_height << 16
+        0,
+        0,
+        m_display_width,
+        m_display_height,
+        0,
+        0,
+        m_video_width << 16,
+        m_video_height << 16
     );
     if (ret < 0) {
         LOG_ERROR("drmModeSetPlane 失败: {}", ret);
@@ -157,7 +185,8 @@ bool DrmDisplay::init(
     return true;
 }
 
-void DrmDisplay::close() {
+void DrmDisplay::close()
+{
     if (m_plane_id && m_fd >= 0) {
         drmModeSetPlane(m_fd, m_plane_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
@@ -167,7 +196,7 @@ void DrmDisplay::close() {
     }
 
     // 清理 NV12 缓存
-    for (auto& pair : m_nv12_cache) {
+    for (auto &pair : m_nv12_cache) {
         if (pair.second.fb_id) {
             drmModeRmFB(m_fd, pair.second.fb_id);
         }
@@ -187,7 +216,8 @@ void DrmDisplay::close() {
     m_initialized = false;
 }
 
-void *DrmDisplay::get_back_buffer(size_t *size) {
+void *DrmDisplay::get_back_buffer(size_t *size)
+{
     int idx = (m_front_buf + 1) % 2;
     if (size) {
         *size = m_buffers[idx].size;
@@ -195,7 +225,8 @@ void *DrmDisplay::get_back_buffer(size_t *size) {
     return m_buffers[idx].map;
 }
 
-void DrmDisplay::flip() {
+void DrmDisplay::flip()
+{
     if (!m_initialized) {
         return;
     }
@@ -214,8 +245,14 @@ void DrmDisplay::flip() {
         m_crtc_id,
         buf.fb_id,
         0,
-        0, 0, m_display_width, m_display_height,
-        0, 0, m_video_width << 16, m_video_height << 16
+        0,
+        0,
+        m_display_width,
+        m_display_height,
+        0,
+        0,
+        m_video_width << 16,
+        m_video_height << 16
     );
 
     m_front_buf = idx;
@@ -226,7 +263,8 @@ bool DrmDisplay::create_buffer(
     uint32_t height,
     uint32_t format,
     Buffer &buf
-) {
+)
+{
     struct drm_mode_create_dumb create = {};
     create.width = width;
     create.height = height;
@@ -243,7 +281,17 @@ bool DrmDisplay::create_buffer(
     uint32_t pitches[4] = {create.pitch, 0, 0, 0};
     uint32_t offsets[4] = {0, 0, 0, 0};
 
-    if (drmModeAddFB2(m_fd, width, height, format, handles, pitches, offsets, &buf.fb_id, 0) < 0) {
+    if (drmModeAddFB2(
+            m_fd,
+            width,
+            height,
+            format,
+            handles,
+            pitches,
+            offsets,
+            &buf.fb_id,
+            0
+        ) < 0) {
         struct drm_mode_destroy_dumb dreq = {};
         dreq.handle = create.handle;
         ioctl(m_fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
@@ -261,7 +309,14 @@ bool DrmDisplay::create_buffer(
         return false;
     }
 
-    buf.map = mmap(nullptr, create.size, PROT_READ | PROT_WRITE, MAP_SHARED, m_fd, map.offset);
+    buf.map = mmap(
+        nullptr,
+        create.size,
+        PROT_READ | PROT_WRITE,
+        MAP_SHARED,
+        m_fd,
+        map.offset
+    );
     if (buf.map == MAP_FAILED) {
         buf.map = nullptr;
     }
@@ -269,7 +324,8 @@ bool DrmDisplay::create_buffer(
     return true;
 }
 
-void DrmDisplay::destroy_buffer(Buffer &buf) {
+void DrmDisplay::destroy_buffer(Buffer &buf)
+{
     if (buf.map) {
         munmap(buf.map, buf.size);
         buf.map = nullptr;
@@ -293,8 +349,10 @@ int DrmDisplay::set_property(
     uint32_t object_type,
     const char *prop_name,
     uint64_t value
-) {
-    drmModeObjectProperties *props = drmModeObjectGetProperties(m_fd, object_id, object_type);
+)
+{
+    drmModeObjectProperties *props =
+        drmModeObjectGetProperties(m_fd, object_id, object_type);
     if (!props) {
         return -1;
     }
@@ -303,11 +361,18 @@ int DrmDisplay::set_property(
     for (uint32_t i = 0; i < props->count_props; ++i) {
         drmModePropertyRes *prop = drmModeGetProperty(m_fd, props->props[i]);
         if (prop && strcmp(prop->name, prop_name) == 0) {
-            ret = drmModeObjectSetProperty(m_fd, object_id, object_type, prop->prop_id, value);
+            ret = drmModeObjectSetProperty(
+                m_fd,
+                object_id,
+                object_type,
+                prop->prop_id,
+                value
+            );
             drmModeFreeProperty(prop);
             break;
         }
-        if (prop) drmModeFreeProperty(prop);
+        if (prop)
+            drmModeFreeProperty(prop);
     }
 
     drmModeFreeObjectProperties(props);
@@ -320,7 +385,8 @@ bool DrmDisplay::display_nv12(
     uint32_t height,
     uint32_t hor_stride,
     uint32_t ver_stride
-) {
+)
+{
     if (!m_initialized || fd < 0) {
         return false;
     }
@@ -346,8 +412,17 @@ bool DrmDisplay::display_nv12(
         uint32_t pitches[4] = {hor_stride, hor_stride, 0, 0};
         uint32_t offsets[4] = {0, hor_stride * ver_stride, 0, 0};
 
-        ret = drmModeAddFB2(m_fd, width, height, DRM_FORMAT_NV12,
-                            handles, pitches, offsets, &fb_id, 0);
+        ret = drmModeAddFB2(
+            m_fd,
+            width,
+            height,
+            DRM_FORMAT_NV12,
+            handles,
+            pitches,
+            offsets,
+            &fb_id,
+            0
+        );
         if (ret < 0) {
             LOG_ERROR("drmModeAddFB2 (NV12) 失败: {}", ret);
             struct drm_gem_close close_req = {};
@@ -375,8 +450,14 @@ bool DrmDisplay::display_nv12(
         m_crtc_id,
         fb_id,
         0,
-        0, 0, m_display_width, m_display_height,
-        0, 0, width << 16, height << 16
+        0,
+        0,
+        m_display_width,
+        m_display_height,
+        0,
+        0,
+        width << 16,
+        height << 16
     );
 
     if (ret < 0) {
@@ -388,4 +469,3 @@ bool DrmDisplay::display_nv12(
 }
 
 } // namespace player
-

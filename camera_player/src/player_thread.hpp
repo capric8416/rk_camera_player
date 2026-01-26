@@ -1,9 +1,9 @@
 #ifndef PLAYER_THREAD_H
 #define PLAYER_THREAD_H
 
-#include <QThread>
-#include <memory>
 #include <atomic>
+#include <memory>
+#include <QThread>
 
 #include "player/i_player.hpp"
 
@@ -13,7 +13,7 @@ class FilePlayer;
 
 /**
  * PlayerThread - 在单独线程中运行 Player
- * 
+ *
  * 根据 config.camera_device 自动选择 CameraPlayer 或 FilePlayer:
  * - /dev/ 路径使用 CameraPlayer
  * - 其他路径使用 FilePlayer
@@ -28,25 +28,25 @@ public:
     void start_player(const player::PlayerConfig &config);
     void stop_player();
     bool is_capturing() const { return m_capturing; }
-    
+
     /**
      * 请求捕获一张图片 (仅 CameraPlayer)
      * @return 保存的文件路径，失败返回空字符串
      */
     QString capture_image();
-    
+
     /**
      * 开始录像 (仅 CameraPlayer)
      * @return 成功返回 true
      */
     bool start_video_capture();
-    
+
     /**
      * 停止录像 (仅 CameraPlayer)
      * @return 录像文件路径
      */
     QString stop_video_capture();
-    
+
     /**
      * 是否正在录像
      */
@@ -75,7 +75,7 @@ protected:
 
 private:
     bool is_file_path() const;
-    
+
     std::unique_ptr<player::IPlayer> m_player;
     player::PlayerConfig m_config;
     std::atomic<bool> m_capturing;
