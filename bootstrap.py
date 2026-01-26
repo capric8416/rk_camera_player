@@ -50,6 +50,13 @@ def main():
         symlinks_module.main()
         print("OK\n")
 
+        # 3. Unarchive 7z files
+        print("=== Unarchiving 7z files ===")
+        os.chdir(CROSS_DIR)
+        unarchive_module = import_module_from_path("unarchive", CROSS_DIR / "unarchive.py")
+        unarchive_module.unarchive()
+        print("OK\n")
+
         print("Bootstrap completed successfully!")
         print("You can now run: python build.py rebuild")
         return 0
