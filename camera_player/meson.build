@@ -33,10 +33,15 @@ spdlog_dep = dependency('spdlog', required: true)
 qt5 = import('qt5')
 
 # 包含目录
-inc_dirs = include_directories(
+# 包含目录
+system_inc_dirs = include_directories(
     '../third_party/include',
     '../third_party/include/qt5',
     '../third_party/include/libdrm',
+    is_system: true,
+)
+
+user_inc_dirs = include_directories(
     'src',
     'src/player',
 )
@@ -116,7 +121,7 @@ executable('camera_player',
     moc_files,
     ui_headers,
     rcc_files,
-    include_directories: inc_dirs,
+    include_directories: [system_inc_dirs, user_inc_dirs],
     dependencies: [
         qt5_core,
         qt5_gui,
