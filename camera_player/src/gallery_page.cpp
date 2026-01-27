@@ -106,25 +106,30 @@ GalleryPage::GalleryPage(QWidget *parent)
 
         LOG_INFO("Fullscreen: dx={}, dy={}, distance={}", dx, dy, distance);
 
-        // 检查上下滑动
+        // 1. 检测上下滑动
         if (qAbs(dy) > SWIPE_THRESHOLD && qAbs(dy) > qAbs(dx)) {
             if (dy < 0) {
-                LOG_INFO("Fullscreen: Swipe up - next image");
+                // 向上滑动 → 返回列表
+                LOG_INFO("Fullscreen: Swipe up - back to gallery");
+                hide_fullscreen();
+            }
+            return;
+        }
+
+        // 2. 检测左右滑动 → 切换图片
+        if (qAbs(dx) > SWIPE_THRESHOLD && qAbs(dx) > qAbs(dy)) {
+            if (dx < 0) {
+                LOG_INFO("Fullscreen: Swipe left - next image");
                 show_next_image();
             } else {
-                LOG_INFO("Fullscreen: Swipe down - previous image");
+                LOG_INFO("Fullscreen: Swipe right - previous image");
                 show_previous_image();
             }
             return;
         }
 
-        // 短按关闭 - 已移除
-        /*
-        if (distance < TAP_THRESHOLD) {
-            LOG_INFO("Fullscreen: Tap - hide fullscreen");
-            hide_fullscreen();
-        }
-        */
+        // 3. 短按无操作（避免误触）
+        LOG_INFO("Fullscreen: Tap ignored (use swipe or long press)");
     };
 
     m_fullscreen_label = clickableLabel;

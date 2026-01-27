@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    player::init_logger("rv1126b_ui", "log");
+    player::init_logger("camera_player", "log");
 
     MainWindow window;
     window.show();
