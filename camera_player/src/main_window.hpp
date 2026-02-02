@@ -28,8 +28,10 @@ public:
     void show_gallery_page();
     void show_videos_page();
     void show_settings_page();
+    void show_languages_page();
 
 public slots:
+    void change_language(int index);
     void start_camera();
     void stop_camera();
     void capture_image();

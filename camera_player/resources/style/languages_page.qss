@@ -1,0 +1,42 @@
+/* LanguagesPage 语言设置页面样式 */
+
+/* 头部样式复用 SettingsPage 风格 */
+#languagesPage QWidget#headerWidget {
+    background-color: #007CB0;
+}
+
+#languagesPage QLabel#backLabel,
+#languagesPage QLabel#titleLabel {
+    color: white;
+    background-color: transparent;
+}
+
+/* 列表容器 */
+#languagesPage QListWidget#languageList {
+    padding: 10px;
+    border: none;
+    background-color: rgb(233,233,231);
+}
+
+#languagesPage QListWidget#languageList::item {
+    /* margin-bottom: 5px; removed for grid */
+    border-radius: 10px;
+    background-color: white;
+    border: none;
+    color: black;
+}
+
+/* 列表项选中状态 */
+#languagesPage QListWidget#languageList::item:selected {
+    background-color: rgb(111,156,211);
+    color: white;
+}
+
+/* 列表项悬停状态 */
+#languagesPage QListWidget#languageList::item:hover {
+    background-color: rgb(240, 240, 240);
+}
+
+#languagesPage QListWidget#languageList::item:selected:hover {
+    background-color: rgb(111,156,211);
+}

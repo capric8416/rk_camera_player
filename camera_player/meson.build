@@ -58,6 +58,7 @@ gui_sources = files(
     'src/gallery_page.cpp',
     'src/videos_page.cpp',
     'src/settings_page.cpp',
+    'src/languages_page.cpp',
 )
 
 # Player 源文件 (Camera Overlay)
@@ -84,6 +85,7 @@ headers = files(
     'src/gallery_page.hpp',
     'src/videos_page.hpp',
     'src/settings_page.hpp',
+    'src/languages_page.hpp',
 )
 
 # UI 文件
@@ -95,6 +97,7 @@ ui_files = files(
     'ui/gallery_page.ui',
     'ui/videos_page.ui',
     'ui/settings_page.ui',
+    'ui/languages_page.ui',
 )
 
 # Qt5 预处理

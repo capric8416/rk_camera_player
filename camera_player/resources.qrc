@@ -32,6 +32,7 @@
         
         <!-- Settings Page -->
         <file>resources/style/settings_page.qss</file>
+        <file>resources/style/languages_page.qss</file>
         <file>resources/icon/language_set.png</file>
         <file>resources/icon/date_time_set.png</file>
         <file>resources/icon/brightness_set.png</file>

@@ -44,6 +44,8 @@
       <widget class="VideosPage" name="videosPage"/>
       <!-- Page 5: settingsPage (设置页面) - Promoted to SettingsPage -->
       <widget class="SettingsPage" name="settingsPage"/>
+      <!-- Page 6: languagesPage (语言设置页面) - Promoted to LanguagesPage -->
+      <widget class="LanguagesPage" name="languagesPage"/>
      </widget>
     </item>
    </layout>
@@ -84,6 +86,12 @@
    <class>SettingsPage</class>
    <extends>QWidget</extends>
    <header>settings_page.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LanguagesPage</class>
+   <extends>QWidget</extends>
+   <header>languages_page.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

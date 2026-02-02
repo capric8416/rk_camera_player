@@ -8,6 +8,7 @@
 #include "camera_overlay_page.hpp"
 #include "file_overlay_page.hpp"
 #include "gallery_page.hpp"
+#include "languages_page.hpp"
 #include "launcher_page.hpp"
 #include "player/file_player.hpp"
 #include "player/logger.hpp"
@@ -107,6 +108,26 @@ MainWindow::MainWindow(QWidget *parent)
         &SettingsPage::back_clicked,
         this,
         &MainWindow::show_launcher_page
+    );
+    connect(
+        ui->settingsPage,
+        &SettingsPage::language_setting_clicked,
+        this,
+        &MainWindow::show_languages_page
+    );
+
+    // 连接 languages 页面信号
+    connect(
+        ui->languagesPage,
+        &LanguagesPage::back_clicked,
+        this,
+        &MainWindow::show_settings_page
+    );
+    connect(
+        ui->languagesPage,
+        &LanguagesPage::language_selected,
+        this,
+        &MainWindow::change_language
     );
 
     // 连接 videos 页面信号
@@ -245,6 +266,61 @@ void MainWindow::show_settings_page()
     ); // Ensure any overlays are hidden if necessary
     ui->stackedWidget->setCurrentWidget(ui->settingsPage);
     LOG_INFO("Switched to settings page");
+}
+
+void MainWindow::show_languages_page()
+{
+    ui->stackedWidget->setCurrentWidget(ui->languagesPage);
+    LOG_INFO("Switched to languages page");
+}
+
+void MainWindow::change_language(int index)
+{
+    LOG_INFO("Change language requested: {}", index);
+
+    // Mapping index to QM file
+    // 0: English, 1: Chinese, 2: Japanese, etc.
+    static const QString QM_FILES[] = {
+        "en.qm",    // 0: English
+        "zh_CN.qm", // 1: 简体中文
+        "ja.qm",    // 2: 日本
+        "ko.qm",    // 3: 한국어
+        "es.qm",    // 4: Español
+        "de.qm",    // 5: Deutsch
+        "uk.qm",    // 6: Українська
+        "ar.qm",    // 7: بالعربية
+        "pt.qm",    // 8: Português
+        "fr.qm",    // 9: Français
+        "ru.qm",    // 10: Русский
+        "th.qm",    // 11: ไทย
+        "tr.qm",    // 12: Türkçe
+        "vi.qm",    // 13: Tiếng Việt
+        "pl.qm"     // 14: Polski
+    };
+
+    if (index >= 0 && index < (int)(sizeof(QM_FILES) / sizeof(QM_FILES[0]))) {
+        QString qmFile = TRANSLATIONS_DIR + QM_FILES[index];
+
+        if (m_translator->load(qmFile)) {
+            QCoreApplication::installTranslator(m_translator);
+            LOG_INFO("Loaded translation: {}", qmFile.toStdString());
+
+            // Refresh UI
+            ui->retranslateUi(this);
+            ui->galleryPage->refresh();
+            ui->launcherPage->update_date_time();
+
+            if (ui->settingsPage)
+                ui->settingsPage->translateUi();
+            if (ui->languagesPage)
+                ui->languagesPage->translateUi();
+        } else {
+            LOG_ERROR("Failed to load translation: {}", qmFile.toStdString());
+        }
+    }
+
+    // Go back to settings page after selection
+    show_settings_page();
 }
 
 void MainWindow::handle_camera_connected()
