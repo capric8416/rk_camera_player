@@ -68,20 +68,23 @@ def fix_pc_prefix(install_dir):
     for pc_file in pc_dir.glob("*.pc"):
         try:
             with open(pc_file, "r", encoding="utf-8") as f:
-                content = f.read()
+                lines = f.readlines()
             
-            # Replace absolute install_dir with relative pcfiledir
-            content = content.replace(
-                f"prefix={install_dir.as_posix()}", 
-                "prefix=${pcfiledir}/../../.."
-            )
-            content = content.replace(
-                "libdir=${exec_prefix}/lib", 
-                "libdir=${pcfiledir}/.."
-            )
+            new_lines = []
+            for line in lines:
+                if line.startswith("prefix="):
+                    new_lines.append("prefix=${pcfiledir}/../../..\n")
+                elif line.startswith("exec_prefix="):
+                    new_lines.append("exec_prefix=${prefix}\n")
+                elif line.startswith("libdir="):
+                    new_lines.append("libdir=${pcfiledir}/..\n")
+                elif line.startswith("includedir="):
+                    new_lines.append("includedir=${prefix}/include\n")
+                else:
+                    new_lines.append(line)
             
             with open(pc_file, "w", encoding="utf-8") as f:
-                f.write(content)
+                f.writelines(new_lines)
             print(f"Fixed: {pc_file.name}")
         except Exception as e:
             print(f"Error fixing {pc_file.name}: {e}")

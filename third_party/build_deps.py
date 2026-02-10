@@ -32,6 +32,11 @@ def main():
         action="store_true",
         help="强制重新构建 (删除 temp 目录)"
     )
+    parser.add_argument(
+        "-D", "--deploy",
+        action="store_true",
+        help="部署构建结果到统一目录 (temp/install)"
+    )
     args = parser.parse_args()
 
     cwd = os.getcwd()
@@ -58,6 +63,13 @@ def main():
         build_func = build_map.get(name)
         if build_func:
             build_func()
+            
+        if args.deploy:
+            src_install = config.TEMP_DIR / name / "install"
+            dst_install = config.TEMP_DIR / "install"
+            if src_install.exists():
+                print(f"Deploying {name} to {dst_install}...")
+                shutil.copytree(src_install, dst_install, dirs_exist_ok=True)
 
     if args.lib == "all":
         for name in build_map.keys():

@@ -48,8 +48,9 @@ description = "build dependencies"
 usage = """
 arg "[lib]" help="library to build" { choices "mpp" "rga" "ffmpeg" "spdlog" "all"; }
 flag "-R --rebuild" help="clean build (delete temp directory)"
+flag "-D --deploy" help="deploy results to unified temp/install directory"
 """
-run = "python third_party/build_deps.py {{ usage.lib | default(value='') }} {% if usage.rebuild %}--rebuild{% endif %}"
+run = "python third_party/build_deps.py {{ usage.lib | default(value='') }} {% if usage.rebuild %}--rebuild{% endif %} {% if usage.deploy %}--deploy{% endif %}"
 
 [tasks.format]
 alias = "format"
