@@ -13,42 +13,16 @@ Date:   Fri Nov 28 19:30:13 2025 +0800
 """
 
 import argparse
-import os
 import shutil
-import subprocess
 import sys
-from pathlib import Path
+
+import config
 
 # Paths relative to this script
-SCRIPT_DIR = Path(__file__).parent.resolve()
-PROJECT_ROOT = SCRIPT_DIR.parent
-CROSS_DIR_NAME = "cross_toolchains"
-CROSS_DIR = PROJECT_ROOT / CROSS_DIR_NAME
-CROSS_TARGET = os.environ["CROSS_TARGET"]
-TOOLCHAIN_FILE = CROSS_DIR / f"toolchain.{CROSS_TARGET}.cmake"
-
-MPP_DIR = SCRIPT_DIR / "temp" / "mpp"
+MPP_DIR = config.TEMP_DIR / "mpp"
 SRC_DIR = MPP_DIR / "src"
 BUILD_DIR = MPP_DIR / "build"
 INSTALL_DIR = MPP_DIR / "install"
-
-def setup_environment():
-    """设置交叉编译环境变量"""
-    
-    # 将工具链路径加入 PATH
-    os.environ["PATH"] = os.pathsep.join([
-        str(CROSS_DIR / CROSS_TARGET),
-        os.environ.get("PATH", "")
-    ])
-    print(f"Toolchain path added: {CROSS_DIR / CROSS_TARGET}")
-
-def run_cmd(cmd, cwd=None):
-    """Run a command and check return code"""
-    print(f"Running: {' '.join(cmd)}")
-    result = subprocess.run(cmd, cwd=cwd)
-    if result.returncode != 0:
-        print(f"Error: Command failed with code {result.returncode}")
-        sys.exit(result.returncode)
 
 def clone():
     """Clone MPP repository"""
@@ -65,7 +39,7 @@ def clone():
         "https://gitee.com/nyanmisaka/mpp.git", 
         str(SRC_DIR)
     ]
-    run_cmd(cmd)
+    config.run_cmd(cmd)
 
 def configure():
     """Configure CMake"""
@@ -86,7 +60,7 @@ def configure():
         "-G", "Ninja",
         "-S", str(SRC_DIR),
         "-B", str(BUILD_DIR),
-        f"-DCMAKE_TOOLCHAIN_FILE={TOOLCHAIN_FILE}",
+        f"-DCMAKE_TOOLCHAIN_FILE={config.TOOLCHAIN_FILE}",
         f"-DCMAKE_INSTALL_PREFIX={INSTALL_DIR}",
         "-DCMAKE_BUILD_TYPE=Release",
         "-DBUILD_SHARED_LIBS=ON",
@@ -94,33 +68,19 @@ def configure():
         "-DCMAKE_C_LINKER_DEPFILE_SUPPORTED=OFF",
         "-DCMAKE_CXX_LINKER_DEPFILE_SUPPORTED=OFF"
     ]
-    run_cmd(cmd)
+    config.run_cmd(cmd)
 
 def build():
     """Build MPP"""
     print("Building MPP...")
     cmd = ["cmake", "--build", str(BUILD_DIR), "-j"]
-    run_cmd(cmd)
+    config.run_cmd(cmd)
 
 def install():
     """Install MPP"""
     print("Installing MPP...")
     cmd = ["cmake", "--install", str(BUILD_DIR)]
-    run_cmd(cmd)
-
-def fix_pc_prefix():
-    """Fix pkgconfig files"""
-    print("Fixing pkgconfig files...")
-    pc_dir = INSTALL_DIR / "lib" / "pkgconfig"
-    for pc_file in pc_dir.glob("*.pc"):
-        with open(pc_file, "r") as f:
-            content = f.read()
-        content = content.replace(
-            f"prefix={str(INSTALL_DIR.as_posix())}", 
-            "prefix=${pcfiledir}/../.."
-        )
-        with open(pc_file, "w") as f:
-            f.write(content)
+    config.run_cmd(cmd)
 
 def main():
     parser = argparse.ArgumentParser(description="Build MPP for aarch64")
@@ -129,7 +89,7 @@ def main():
                        help="Action to perform")
     args = parser.parse_args()
     
-    setup_environment()
+    config.setup_env()
     
     if args.action == "clone":
         clone()
@@ -140,13 +100,13 @@ def main():
     elif args.action == "install":
         install()
     elif args.action == "fix_pc_prefix":
-        fix_pc_prefix()
+        config.fix_pc_prefix(INSTALL_DIR)
     elif args.action == "all":
         clone()
         configure()
         build()
         install()
-        fix_pc_prefix()
+        config.fix_pc_prefix(INSTALL_DIR)
 
 if __name__ == "__main__":
     main()

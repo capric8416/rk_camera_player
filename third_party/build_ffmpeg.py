@@ -21,61 +21,20 @@ import os
 import shutil
 import subprocess
 import sys
-from pathlib import Path
+
+import config
 
 # ================= 配置区域 =================
-# Paths relative to this script
-SCRIPT_DIR = Path(__file__).parent.resolve()
-PROJECT_ROOT = SCRIPT_DIR.parent
-CROSS_DIR_NAME = "cross_toolchains"
-CROSS_DIR = PROJECT_ROOT / CROSS_DIR_NAME
-CROSS_TARGET = os.environ["CROSS_TARGET"]
-
 # FFmpeg 目录结构
-FFMPEG_DIR = SCRIPT_DIR / "temp" / "ffmpeg"
+FFMPEG_DIR = config.TEMP_DIR / "ffmpeg"
 FFMPEG_SRC = FFMPEG_DIR / "src"
 BUILD_DIR = FFMPEG_DIR / "build" 
 INSTALL_DIR = FFMPEG_DIR / "install"
 
 # Compatibility Shim
-COMPAT_SRC = SCRIPT_DIR / "compat_random.c"
-COMPAT_OBJ = SCRIPT_DIR / "compat_random.o"
-COMPAT_LIB = SCRIPT_DIR / "libcompat_random.a"
-
-# 确定平台相关的 Python Env bin 目录
-if os.name == "nt":
-    EXE_EXT = ".cmd"
-else:
-    EXE_EXT = ""
-
-def setup_environment():
-    """设置交叉编译环境变量"""
-    msys2_bin = CROSS_DIR / "msys2" / "usr" / "bin"
-    
-    # 将工具链路径加入 PATH
-    os.environ["PATH"] = os.pathsep.join([
-        str(CROSS_DIR),
-        str(CROSS_DIR / CROSS_TARGET),
-        str(msys2_bin),
-        os.environ.get("PATH", "")
-    ])
-    print(f"Toolchain path added: {CROSS_DIR / CROSS_TARGET}")
-
-def run_cmd(cmd, cwd=None, env=None):
-    """运行命令并检查返回码"""
-    # 调试打印
-    cmd_list = cmd if isinstance(cmd, list) else cmd.split()
-    print(f"Running: {' '.join(cmd_list)}")
-    
-    # 合并环境变量
-    run_env = os.environ.copy()
-    if env:
-        run_env.update(env)
-
-    result = subprocess.run(cmd, cwd=cwd, env=run_env, shell=(os.name == "nt"))
-    if result.returncode != 0:
-        print(f"Error: Command failed with code {result.returncode}")
-        sys.exit(result.returncode)
+COMPAT_SRC = config.SCRIPT_DIR / "compat_random.c"
+COMPAT_OBJ = config.SCRIPT_DIR / "compat_random.o"
+COMPAT_LIB = config.SCRIPT_DIR / "libcompat_random.a"
 
 def clone():
     """克隆 FFmpeg 仓库"""
@@ -91,7 +50,7 @@ def clone():
         "https://github.com/FFmpeg/FFmpeg.git",
         str(FFMPEG_SRC)
     ]
-    run_cmd(cmd)
+    config.run_cmd(cmd)
 
 def build_compat_shim():
     """编译 compat_random.c"""
@@ -99,8 +58,8 @@ def build_compat_shim():
         print("Compiling compat_random.c...")
         cc_cmd = ["zig-cc", "-c", str(COMPAT_SRC), "-o", str(COMPAT_OBJ)]
         ar_cmd = ["zig-ar", "rcs", str(COMPAT_LIB), str(COMPAT_OBJ)]
-        run_cmd(cc_cmd)
-        run_cmd(ar_cmd)
+        config.run_cmd(cc_cmd)
+        config.run_cmd(ar_cmd)
         return True
     return False
 
@@ -134,10 +93,8 @@ def configure():
     configure_script = FFMPEG_SRC / "configure"
     
     # 【关键修改】所有路径必须转换为 POSIX 风格 (forward slashes)
-    # Windows 下 str(Path) 会产生反斜杠，导致 busybox bash 转义错误
     conf_path = configure_script.as_posix()
     install_prefix = INSTALL_DIR.as_posix()
-    script_dir_posix = SCRIPT_DIR.as_posix()
 
     EXT = ".cmd" if os.name == "nt" else ""
     NM = "llvm-nm" if os.name == "nt" else "nm"
@@ -200,7 +157,7 @@ def configure():
     }
 
     # 运行 configure
-    run_cmd(args, cwd=BUILD_DIR, env=env_vars)
+    config.run_cmd(args, cwd=BUILD_DIR, env=env_vars)
 
 def build():
     """编译 FFmpeg"""
@@ -217,21 +174,16 @@ def build():
             f.write(content)
 
     # Workaround: Pre-create output directories
-    # Make might fail to create directories if it finds them in SRC_PATH via VPATH/Search
     print("Pre-creating output directories...")
     mkdirs_mak = BUILD_DIR / "mkdirs.mak"
     with open(mkdirs_mak, "w", encoding="utf-8") as f:
         f.write("include Makefile\nprint_dirs:\n\t@echo $(OUTDIRS)\n")
     
     try:
-        # Run make to get directory list
-        # Use run_cmd to reuse environment setup logic?
-        # Need to capture output, so using subprocess.check_output directly with env
+        # Need to capture output
         env = os.environ.copy()
-        # Add toolchain to path just in case
-        msys2_bin = CROSS_DIR / "msys2" / "usr" / "bin"
-        env["PATH"] = os.pathsep.join([str(CROSS_DIR), str(CROSS_DIR / CROSS_TARGET), str(msys2_bin), env.get("PATH", "")])
-        
+        # Ensure path is set up (re-calling config setup_env logic within subprocess)
+        # But we already did it in main()
         output = subprocess.check_output(
             ["make", "-f", str(mkdirs_mak), "print_dirs"],
             cwd=BUILD_DIR,
@@ -254,36 +206,14 @@ def build():
 
     jobs = os.cpu_count() or 1
     args = ["make", "-j", str(jobs)]
-    run_cmd(args, cwd=BUILD_DIR)
+    config.run_cmd(args, cwd=BUILD_DIR)
 
 def install():
     """安装 FFmpeg"""
     print("Installing FFmpeg...")
     args = ["make", "install"]
-    run_cmd(args, cwd=BUILD_DIR)
+    config.run_cmd(args, cwd=BUILD_DIR)
     print(f"FFmpeg build complete. Libraries installed to {INSTALL_DIR}")
-
-def fix_pc_prefix():
-    """Fix pkgconfig files"""
-    print("Fixing pkgconfig files...")
-    pc_dir = INSTALL_DIR / "lib" / "pkgconfig"
-    if not pc_dir.exists():
-        print("Warning: pkgconfig directory not found.")
-        return
-
-    for pc_file in pc_dir.glob("*.pc"):
-        try:
-            with open(pc_file, "r") as f:
-                content = f.read()
-            # 注意：INSTALL_DIR.as_posix() 才能匹配 pc 文件里的路径格式
-            content = content.replace(
-                f"prefix={INSTALL_DIR.as_posix()}", 
-                "prefix=${pcfiledir}/../.."
-            )
-            with open(pc_file, "w") as f:
-                f.write(content)
-        except Exception as e:
-            print(f"Error fixing {pc_file.name}: {e}")
 
 def main():
     parser = argparse.ArgumentParser(description="Build FFmpeg for aarch64 using Zig")
@@ -292,7 +222,7 @@ def main():
                        help="Action to perform")
     args = parser.parse_args()
     
-    setup_environment()
+    config.setup_env()
     
     if args.action == "clone":
         clone()
@@ -303,13 +233,13 @@ def main():
     elif args.action == "install":
         install()
     elif args.action == "fix_pc_prefix":
-        fix_pc_prefix()
+        config.fix_pc_prefix(INSTALL_DIR)
     elif args.action == "all":
         clone()
         configure()
         build()
         install()
-        fix_pc_prefix()
+        config.fix_pc_prefix(INSTALL_DIR)
 
 if __name__ == "__main__":
     main()

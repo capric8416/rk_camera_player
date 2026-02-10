@@ -7,10 +7,13 @@
 
 import os
 import re
-from pathlib import Path
+import sys
 from collections import defaultdict
+from pathlib import Path
 
-CROSS_TARGET = os.environ["CROSS_TARGET"]
+import config
+
+CROSS_TARGET = config.CROSS_TARGET
 
 def get_lib_base_name(filename):
     """提取库基础名称 (不含版本号)"""
@@ -129,7 +132,7 @@ def rebuild_symlinks(directory, dry_run=True):
 
 def main():
     cwd = os.getcwd()
-    lib_dir = f"{Path(__file__).parent}/lib/{CROSS_TARGET}"
+    lib_dir = config.LIB_DIR
     os.chdir(lib_dir)
     rebuild_symlinks(lib_dir, dry_run=False)
     os.chdir(cwd)

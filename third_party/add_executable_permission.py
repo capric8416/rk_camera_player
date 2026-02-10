@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
-
 import os
 import stat
-from pathlib import Path
+import config
 
-QT5_TOOLS_BIN_DIR = f"{Path(__file__).parent}/tools/qt5/bin"
+QT5_TOOLS_BIN_DIR = config.SCRIPT_DIR / "tools" / "qt5" / "bin"
 
 def add_executable_permission(dir):
     current_dir = os.getcwd()
