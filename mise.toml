@@ -4,14 +4,29 @@ python = "3.14"
 
 [env]
 # Add Python Scripts directory to PATH so pip-installed tools (meson, zig-bin) are executable
-# Note: Adjust version path as needed or use {{config_root}} relative paths if applicable
-_.path = ["{{env.LOCALAPPDATA}}\\mise\\installs\\python\\3.14.3\\Scripts"]
+# Note: Only Windows has LOCALAPPDATA, so we conditionally add it
+_.path = ["{% if os() == 'windows' %}{{env.LOCALAPPDATA}}\\mise\\installs\\python\\3.14.3\\Scripts{% endif %}"]
 CROSS_TARGET = "aarch64-linux-gnu.2.17"
 
 [tasks.bootstrap]
+alias = "bs"
 description = "bootstrap toolchains"
 # depends 不是顺序执行，run 是顺序执行
+# run 在 linux/macOS 上执行，run_windows 在 windows 上执行
 run = [
+    "python -m pip install -r cross_toolchains/requirements.txt",
+    "zig version",
+    "cmake --version",
+    "meson --version",
+    "ninja --version",
+    "pkgconf --version",
+    "clang-format --version",
+    "clang-tidy --version",
+    "python cross_toolchains/zig_wrapper.py",
+    "python third_party/rebuild_so_symlinks.py",
+    "python third_party/add_executable_permission.py",
+]
+run_windows = [
     "python -m pip install -r cross_toolchains/requirements.txt",
     "zig version",
     "cmake --version",
@@ -22,32 +37,38 @@ run = [
     "clang-tidy --version",
     "py7zr --version",
     "py7zr x cross_toolchains/msys2.7z cross_toolchains",
-    # "py7zr x cross_toolchains/llvm-nm.7z cross_toolchains",
+    "py7zr x cross_toolchains/llvm-nm.7z cross_toolchains",
     "python cross_toolchains/zig_wrapper.py",
     "python third_party/rebuild_so_symlinks.py",
-    "python third_party/add_executable_permission.py",
 ]
 
 [tasks.build_deps]
+alias = "bd"
 description = "build dependencies"
-run = "python third_party/build_deps.py"
+usage = """
+arg "[lib]" help="library to build" { choices "mpp" "rga" "ffmpeg" "spdlog" "all"; }
+"""
+run = "python third_party/build_deps.py {{ usage.lib | default(value='') }}"
 
 [tasks.format]
+alias = "format"
 description = "format code"
 run = "python format.py"
 
 [tasks.tidy]
+alias = "tidy"
 description = "tidy code"
 run = "python tidy.py"
 
 [tasks.build]
 description = "build code"
-run = "python build.py"
-
-[tasks.rebuild]
-description = "rebuild code"
-run = "python build.py rebuild"
+usage = """
+arg "[action]" help="build action" { choices "configure" "build" "rebuild" "clean" "translate" "all"; }
+flag "-r --release" help="release mode"
+"""
+run = "python build.py {{ usage.action | default(value='') }} {% if usage.release %}--release{% endif %}"
 
 [tasks.clean]
+alias = "clean"
 description = "clean build directory"
 run = "python build.py clean"
