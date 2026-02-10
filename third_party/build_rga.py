@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Build Rockchip RGA library for aarch64-linux-gnu
-使用 Meson + Zig CC 交叉编译
+# Cross-compilation using Meson + Zig CC
 
 https://gitee.com/nyanmisaka/rga.git
 commit 1d330cc28551943bed3380261a5a9c6fbd58ff53 (origin/jellyfin-rga)
@@ -20,14 +20,14 @@ import sys
 
 import config
 
-# RGA 目录结构
+# RGA directory structure
 RGA_DIR = config.TEMP_DIR / "rga"
 SRC_DIR = RGA_DIR / "src"
 BUILD_DIR = RGA_DIR / "build"
 INSTALL_DIR = RGA_DIR / "install"
 
 def clone():
-    """克隆 RGA 仓库"""
+    """Clone RGA repository"""
     if SRC_DIR.exists():
         print("RGA source already exists, skipping clone.")
         return
@@ -44,14 +44,14 @@ def clone():
     config.run_cmd(cmd)
 
 def configure():
-    """配置 Meson 构建"""
+    """Configure Meson build"""
     print("Configuring RGA...")
     
     if not SRC_DIR.exists():
         print("Error: Source directory not found. Run clone first.")
         sys.exit(1)
         
-    # 清理旧的构建目录以确保配置纯净
+    # Clean old build directory to ensure fresh configuration
     if BUILD_DIR.exists():
         print("Cleaning build directory...")
         shutil.rmtree(BUILD_DIR)
@@ -61,26 +61,26 @@ def configure():
         str(BUILD_DIR),
         str(SRC_DIR),
         "--cross-file", str(config.MESON_CROSS_FILE),
-        f"--prefix={INSTALL_DIR.as_posix()}", # 使用 Posix 路径防止 Windows 反斜杠问题
+        f"--prefix={INSTALL_DIR.as_posix()}", # Use Posix path to avoid Windows backslash issues
         "--libdir=lib",
         "--buildtype=release",
         "--default-library=shared",
-        "-Dcpp_args=-fpermissive", # 关键: 允许旧式 C++ 语法
-        "-Dlibdrm=false",          # 关闭 libdrm 依赖
-        "-Dlibrga_demo=false"      # 不编译 demo
+        "-Dcpp_args=-fpermissive", # Critical: allow old-style C++ syntax
+        "-Dlibdrm=false",          # Disable libdrm dependency
+        "-Dlibrga_demo=false"      # Do not compile demo
     ]
     
     config.run_cmd(cmd)
 
 def build():
-    """编译 RGA"""
+    """Compile RGA"""
     print("Building RGA...")
-    # -C 指定构建目录
+    # -C specifies the build directory
     cmd = ["meson", "compile", "-C", str(BUILD_DIR)]
     config.run_cmd(cmd)
 
 def install():
-    """安装 RGA 到本地目录"""
+    """Install RGA to local directory"""
     print("Installing RGA...")
     cmd = ["meson", "install", "-C", str(BUILD_DIR)]
     config.run_cmd(cmd)

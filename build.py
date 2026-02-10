@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-Camera Player 构建脚本
-使用 Meson + Zig CC 交叉编译 Qt Widgets 应用到 aarch64-linux-gnu
+Camera Player Build Script
+Cross-compiles Qt Widgets application to aarch64-linux-gnu using Meson + Zig CC.
 
-用法:
-    python3 build.py              # 默认: configure + build
-    python3 build.py configure    # 仅配置
-    python3 build.py build        # 仅编译
-    python3 build.py rebuild      # 清理并重新构建
-    python3 build.py clean        # 清理构建目录
-    python3 build.py translate    # 编译翻译文件 (.ts -> .qm)
+Usage:
+    python3 build.py              # Default: configure + build
+    python3 build.py configure    # Only configure
+    python3 build.py build        # Only build
+    python3 build.py rebuild      # Clean and rebuild
+    python3 build.py clean        # Clean build directory
+    python3 build.py translate    # Compile translation files (.ts -> .qm)
 """
 
 import os
@@ -31,12 +31,12 @@ else:
     MESON_CROSS_FILE = f"cross-file.nix.{CROSS_TARGET}.meson"
 
 def setup_environment():
-    """设置环境变量"""
+    """Sets up cross-compilation environment variables."""
     script_dir = Path(__file__).parent.resolve()
     cross_dir = script_dir / CROSS_DIR
     third_party_dir = script_dir / THIRD_PARTY_DIR
     
-    # 添加交叉编译工具链到 PATH
+    # Add cross-compilation toolchain to PATH
     path_additions = [
         str(cross_dir / CROSS_TARGET),
         str(third_party_dir / "tools" / "qt5" / "bin")
@@ -44,13 +44,13 @@ def setup_environment():
     os.environ["PATH"] = os.pathsep.join(path_additions) + os.pathsep + os.environ.get("PATH", "")
     print("PATH:", os.environ["PATH"])
     
-    # 添加 *.pc 路径
+    # Add *.pc paths
     pkg_config_path = third_party_dir / "lib" / CROSS_TARGET / "pkgconfig"
     os.environ["PKG_CONFIG_PATH"] = str(pkg_config_path)
     os.environ["PKG_CONFIG_SYSROOT_DIR"] = ""
     print("PKG_CONFIG_PATH:", os.environ["PKG_CONFIG_PATH"])
     
-    # 设置 CMAKE_PREFIX_PATH 使得 CMake 能找到 third_party 中的库 (如 rapidyaml)
+    # Set CMAKE_PREFIX_PATH so CMake can find third-party libraries (e.g., rapidyaml)
     cmake_config_dir = third_party_dir / "lib" / CROSS_TARGET / "cmake"
     os.environ["CMAKE_PREFIX_PATH"] = str(cmake_config_dir)
     print("CMAKE_PREFIX_PATH:", os.environ["CMAKE_PREFIX_PATH"])
@@ -58,32 +58,32 @@ def setup_environment():
     return script_dir, cross_dir
 
 def clean(script_dir):
-    """清理构建目录"""
+    """Cleans the build directory."""
     build_dir = script_dir / BUILD_DIR
     if build_dir.exists():
-        print("清理构建目录...")
+        print("Cleaning build directory...")
         shutil.rmtree(build_dir)
-        print("清理完成")
+        print("Clean complete.")
         return True
     else:
-        print("构建目录不存在，无需清理")
+        print("Build directory does not exist, no clean needed.")
         return True
 
 def configure(script_dir, cross_dir, force=False, release=True):
-    """配置 Meson 构建"""
+    """Configures Meson build."""
     build_dir = script_dir / BUILD_DIR
     cross_file = cross_dir / MESON_CROSS_FILE
     
     if build_dir.exists():
         if force:
-            print("清理旧构建目录...")
+            print("Cleaning old build directory...")
             shutil.rmtree(build_dir)
         else:
-            print("构建目录已存在，跳过配置 (使用 rebuild 强制重新配置)")
+            print("Build directory already exists, skipping configuration (use rebuild to force).")
             return True
     
     buildtype = "release" if release else "debug"
-    print(f"配置 Meson ({buildtype})...")
+    print(f"Configuring Meson ({buildtype})...")
     cmd = [
         "meson", "setup",
         str(build_dir),
@@ -96,14 +96,14 @@ def configure(script_dir, cross_dir, force=False, release=True):
     return result.returncode == 0
 
 def build(script_dir, release=False):
-    """编译项目"""
+    """Compiles the project."""
     build_dir = script_dir / BUILD_DIR
     
     if not build_dir.exists():
-        print("错误: 构建目录不存在，请先运行 configure")
+        print("Error: Build directory does not exist, please run configure first.")
         return False
     
-    print("编译中...")
+    print("Building...")
     cmd = ["meson", "compile", "-C", str(build_dir)]
     
     result = subprocess.run(cmd)
@@ -111,11 +111,11 @@ def build(script_dir, release=False):
         return False
         
     if release:
-        print("Release 构建: 执行 strip...")
+        print("Release build: performing strip...")
         binary_path = build_dir / "camera_player"
         if binary_path.exists():
-            # zig-strip 需要输出到新文件，不能原地 strip
-            # 策略: rename -> strip -> delete renamed
+            # zig-strip requires outputting to a new file, cannot strip in-place
+            # Strategy: rename -> strip -> delete renamed
             unstripped_path = binary_path.with_suffix(".unstripped")
             
             try:
@@ -127,35 +127,35 @@ def build(script_dir, release=False):
                 strip_result = subprocess.run(strip_cmd, shell=True)
                 
                 if strip_result.returncode == 0:
-                    print(f"Strip 完成: {binary_path}")
+                    print(f"Strip complete: {binary_path}")
                     # 3. Delete unstripped
                     unstripped_path.unlink()
                 else:
-                    print("Strip 失败, 还原文件...")
+                    print("Strip failed, restoring file...")
                     shutil.move(unstripped_path, binary_path)
             except Exception as e:
-                print(f"Strip 过程出错: {e}, unstripped_path: {unstripped_path}, binary_path: {binary_path}")
+                print(f"Error during strip process: {e}, unstripped_path: {unstripped_path}, binary_path: {binary_path}")
                 if unstripped_path.exists() and not binary_path.exists():
                     shutil.move(unstripped_path, binary_path)
         else:
-            print(f"警告: 找不到二进制文件 {binary_path}, 跳过 strip")
+            print(f"Warning: Could not find binary {binary_path}, skipping strip")
             
     return True
 
 def translate(script_dir):
-    """编译翻译文件 (.ts -> .qm)"""
+    """Compiles translation files (.ts -> .qm)."""
     translations_dir = script_dir / SRC_DIR / "translations"
     
     if not translations_dir.exists():
-        print("错误: translations 目录不存在")
+        print("Error: translations directory does not exist.")
         return False
     
     ts_files = list(translations_dir.glob("*.ts"))
     if not ts_files:
-        print("没有找到 .ts 文件")
+        print("No .ts files found.")
         return True
     
-    print(f"编译 {len(ts_files)} 个翻译文件...")
+    print(f"Compiling {len(ts_files)} translation files...")
     success = True
     
     for ts_file in ts_files:
@@ -166,25 +166,25 @@ def translate(script_dir):
         result = subprocess.run(cmd, capture_output=True, text=True)
         
         if result.returncode != 0:
-            print(f"    错误: {result.stderr}")
+            print(f"    Error: {result.stderr}")
             success = False
         else:
-            print(f"    完成")
+            print(f"    Done")
     
     return success
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Camera Player 交叉编译脚本",
+        description="Camera Player Cross-compilation Script",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-示例:
-  python3 build.py              # 默认: configure + build
-  python3 build.py configure    # 仅配置
-  python3 build.py build        # 仅编译
-  python3 build.py rebuild      # 清理并重新构建
-  python3 build.py clean        # 清理构建目录
-  python3 build.py translate    # 编译翻译文件
+Examples:
+  python3 build.py              # Default: configure + build
+  python3 build.py configure    # Only configure
+  python3 build.py build        # Only build
+  python3 build.py rebuild      # Clean and rebuild
+  python3 build.py clean        # Clean build directory
+  python3 build.py translate    # Compile translation files
 """
     )
     parser.add_argument(
@@ -192,12 +192,12 @@ def main():
         nargs="?",
         default="all",
         choices=["configure", "build", "rebuild", "clean", "translate", "all"],
-        help="构建动作 (默认: all = configure + build)"
+        help="Build action (default: all = configure + build)"
     )
     parser.add_argument(
         "--release", "-r",
         action="store_true",
-        help="Release 构建"
+        help="Release build"
     )
     
     args = parser.parse_args()
@@ -206,54 +206,54 @@ def main():
     release_build = args.release
     
     print("=" * 50)
-    print("Camera Player 交叉编译")
+    print("Camera Player Cross-compilation")
     print("=" * 50)
     
-    # 设置环境变量
+    # Set environment variables
     script_dir, cross_dir = setup_environment()
     
-    print(f"项目目录: {script_dir}")
-    print(f"动作: {args.action}")
+    print(f"Project directory: {script_dir}")
+    print(f"Action: {args.action}")
     print()
     
-    # 执行对应动作
+    # Execute corresponding action
     if args.action == "clean":
         if not clean(script_dir):
             return 1
     elif args.action == "configure":
         if not configure(script_dir, cross_dir, force=True, release=release_build):
-            print("配置失败!")
+            print("Configuration failed!")
             return 1
     elif args.action == "build":
         if not build(script_dir, release=release_build):
-            print("编译失败!")
+            print("Compilation failed!")
             return 1
     elif args.action == "rebuild":
         if not clean(script_dir):
             return 1
         if not configure(script_dir, cross_dir, force=True, release=release_build):
-            print("配置失败!")
+            print("Configuration failed!")
             return 1
         if not build(script_dir, release=release_build):
-            print("编译失败!")
+            print("Compilation failed!")
             return 1
     elif args.action == "translate":
         if not translate(script_dir):
-            print("翻译编译失败!")
+            print("Translation compilation failed!")
             return 1
-    else:  # all (默认)
+    else:  # all (default)
         if not configure(script_dir, cross_dir, force=False, release=release_build):
-            print("配置失败!")
+            print("Configuration failed!")
             return 1
         if not build(script_dir, release=release_build):
-            print("编译失败!")
+            print("Compilation failed!")
             return 1
     
     print()
     print("=" * 50)
-    print("完成!")
+    print("Done!")
     if args.action in ["all", "build", "rebuild"]:
-        print(f"输出: {script_dir / BUILD_DIR / 'camera_player'}")
+        print(f"Output: {script_dir / BUILD_DIR / 'camera_player'}")
     print("=" * 50)
     
     return 0

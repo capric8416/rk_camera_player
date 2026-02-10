@@ -24,8 +24,8 @@ import sys
 
 import config
 
-# ================= 配置区域 =================
-# FFmpeg 目录结构
+# ================= Configuration Area =================
+# FFmpeg directory structure
 FFMPEG_DIR = config.TEMP_DIR / "ffmpeg"
 FFMPEG_SRC = FFMPEG_DIR / "src"
 BUILD_DIR = FFMPEG_DIR / "build" 
@@ -37,7 +37,7 @@ COMPAT_OBJ = config.SCRIPT_DIR / "compat_random.o"
 COMPAT_LIB = config.SCRIPT_DIR / "libcompat_random.a"
 
 def clone():
-    """克隆 FFmpeg 仓库"""
+    """Clone FFmpeg repository"""
     if FFMPEG_SRC.exists():
         print("FFmpeg source already exists, skipping clone.")
         return
@@ -53,7 +53,7 @@ def clone():
     config.run_cmd(cmd)
 
 def build_compat_shim():
-    """编译 compat_random.c"""
+    """Build compat_random.c"""
     if COMPAT_SRC.exists():
         print("Compiling compat_random.c...")
         cc_cmd = ["zig-cc", "-c", str(COMPAT_SRC), "-o", str(COMPAT_OBJ)]
@@ -64,27 +64,27 @@ def build_compat_shim():
     return False
 
 def configure():
-    """配置 FFmpeg"""
+    """Configure FFmpeg"""
     print("Configuring FFmpeg...")
 
     if not FFMPEG_SRC.exists():
         print("Error: Source directory not found. Run clone first.")
         sys.exit(1)
 
-    # 清理并创建构建目录
+    # Clean and create build directory
     if BUILD_DIR.exists():
         shutil.rmtree(BUILD_DIR)
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
     
-    # 创建一个本地临时目录，避免使用系统 TEMP (防止路径包含反斜杠或空格)
+    # Create a local temporary directory to avoid using system TEMP (prevents path issues with spaces/backslashes)
     LOCAL_TMP_DIR = BUILD_DIR / "tmp"
     LOCAL_TMP_DIR.mkdir(exist_ok=True)
 
-    # 尝试构建 compat shim
+    # Try to build compat shim
     has_compat = build_compat_shim()
 
     extra_ldflags = ""
-    # 注意：这里的路径也必须转为 posix 格式，否则传递给 LDFLAGS 会出问题
+    # Note: paths must be converted to POSIX format, otherwise LDFLAGS will have issues
     if has_compat and COMPAT_LIB.exists():
         extra_ldflags = COMPAT_LIB.as_posix()
     elif "COMPAT_LIB" in os.environ:
@@ -92,7 +92,7 @@ def configure():
 
     configure_script = FFMPEG_SRC / "configure"
     
-    # 【关键修改】所有路径必须转换为 POSIX 风格 (forward slashes)
+    # [CRITICAL] All paths must be converted to POSIX style (forward slashes)
     conf_path = configure_script.as_posix()
     install_prefix = INSTALL_DIR.as_posix()
 
@@ -101,7 +101,7 @@ def configure():
 
     args = [
         "bash",
-        conf_path,  # 使用 posix 路径
+        conf_path,  # Use posix path
         f"--prefix={install_prefix}",
         "--arch=aarch64",
         "--target-os=linux",
@@ -114,7 +114,7 @@ def configure():
         f"--ranlib=zig-ranlib{EXT}",
         f"--nm={NM}",
         
-        # === 功能裁剪 ===
+        # === Feature Pruning ===
         "--disable-everything",
         "--enable-muxer=mov,mp4",
         "--enable-demuxer=mov,mp4",
@@ -149,18 +149,18 @@ def configure():
         f"--extra-ldflags={extra_ldflags}"
     ]
 
-    # 【关键修改】强制设置 TMPDIR 为我们创建的 posix 路径
+    # [CRITICAL] Force set TMPDIR to the posix path we created
     env_vars = {
         "TMPDIR": LOCAL_TMP_DIR.as_posix(),
         "TEMP": LOCAL_TMP_DIR.as_posix(),
         "TMP": LOCAL_TMP_DIR.as_posix()
     }
 
-    # 运行 configure
+    # Run configure
     config.run_cmd(args, cwd=BUILD_DIR, env=env_vars)
 
 def build():
-    """编译 FFmpeg"""
+    """Build FFmpeg"""
     print("Building FFmpeg...")
 
     # Fix config.h
@@ -209,7 +209,7 @@ def build():
     config.run_cmd(args, cwd=BUILD_DIR)
 
 def install():
-    """安装 FFmpeg"""
+    """Install FFmpeg"""
     print("Installing FFmpeg...")
     args = ["make", "install"]
     config.run_cmd(args, cwd=BUILD_DIR)

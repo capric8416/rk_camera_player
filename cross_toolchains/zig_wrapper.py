@@ -4,7 +4,7 @@ import subprocess
 import os
 from pathlib import Path
 
-# ================= 配置区域 =================
+# ================= Configuration Area =================
 TARGET_ARCH = os.environ["CROSS_TARGET"]
 
 ZIG_BIN = ["zig"]
@@ -32,9 +32,9 @@ TOOL_MAP = {
 # ===========================================
 
 def generate_aliases():
-    """生成替身脚本 (兼容 Git Bash 和 Windows CMD)"""
+    """Generates alias scripts (compatible with Git Bash and Windows CMD)."""
     
-    # 创建 zig_toolchain 目录
+    # Create toolchain directory
     BIN_DIR.mkdir(exist_ok=True)
     
     print(f"[+] Generating Universal wrappers in: {BIN_DIR}")
@@ -42,7 +42,7 @@ def generate_aliases():
 
     if os.name == "nt":
         for tool in TOOL_MAP.keys():
-            # 生成 Windows Batch 脚本 (给 CMD / PowerShell 用)
+            # Generate Windows Batch scripts (for CMD / PowerShell)
             # -------------------------------------------------
             cmd_path = BIN_DIR / (f"zig-{tool}.cmd")
             batch_content = f'@echo off\n\n{PYTHON_BIN} "{WRAPPER_SCRIPT}" {tool} %*\n'
@@ -50,28 +50,28 @@ def generate_aliases():
             with open(cmd_path, "w", encoding="utf-8") as f:
                 f.write(batch_content)
 
-        print("[√] Done. Generated .cmd files.")
+        print("[v] Done. Generated .cmd files.")
     else:
         for tool in TOOL_MAP.keys():
-            # 生成 Unix Shell 脚本 (给 Git Bash / configure 用)
+            # Generate Unix Shell scripts (for Git Bash / configure)
             # -------------------------------------------------
             sh_path = BIN_DIR / f"zig-{tool}"
-            # 使用 "$@" 传递所有参数
+            # Use "$@" to pass all arguments
             sh_content = f'#!/bin/sh\n\n{PYTHON_BIN} "{WRAPPER_SCRIPT.as_posix()}" {tool} "$@"\n'
         
             with open(sh_path, "w", encoding="utf-8", newline='\n') as f:
                 f.write(sh_content)
         
-            # 尝试赋予执行权限 (Linux/Mac/GitBash 需要)
+            # Try to grant execution permissions (needed for Linux/Mac/GitBash)
             try:
                 os.chmod(sh_path, 0o755)
             except:
                 pass
 
-        print("[√] Done. Generated shell scripts.")
+        print("[v] Done. Generated shell scripts.")
 
 def run_tool(tool_name, args):
-    """运行实际的 Zig 命令 (保持不变)"""
+    """Run the actual Zig command (keeps original logic)."""
     if tool_name not in TOOL_MAP:
         print(f"Error: Unknown tool '{tool_name}'", file=sys.stderr)
         sys.exit(1)
@@ -79,18 +79,18 @@ def run_tool(tool_name, args):
     zig_subcmd = TOOL_MAP[tool_name]
     cmd = ZIG_BIN + zig_subcmd
     
-    # 只有编译器相关的命令才注入 -target
+    # Only inject -target for compiler-related commands
     if tool_name in ["cc", "cxx", "c++", "cpp", "ld"]:
         cmd.extend(["-target", TARGET_ARCH])
     
-    # 过滤掉已弃用的链接器优化标志
+    # Filter out deprecated linker optimization flags
     args = [arg for arg in args if arg != "-Wl,-O1"]
     
     cmd.extend(args)
 
     try:
-        # 在 Windows 上如果不设置 shell=True，有时找不到 PATH 里的 zig，
-        # 但通常 subprocess.run 默认行为是安全的。如果报错可改为 shell=True。
+        # On Windows, if shell=True is not set, zig in PATH might sometimes be missed,
+        # but subprocess.run default behavior is usually safe. If it errors, change to shell=True.
         result = subprocess.run(cmd)
         sys.exit(result.returncode)
     except FileNotFoundError:
@@ -100,23 +100,23 @@ def run_tool(tool_name, args):
         sys.exit(130)
 
 def main():
-    # 添加环境变量
+    # Add environment variables
     os.environ["PATH"] = os.pathsep.join([
         str(BIN_DIR),
         os.environ["PATH"]
     ])
     
-    # 如果参数是 gen，或者没有参数且双击运行，则生成工具链
+    # If parameters is 'gen', or no parameters and run by double-clicking, generate toolchain
     if len(sys.argv) == 2 and sys.argv[1] == "gen":
         generate_aliases()
         return
 
-    # 逻辑判断：是作为包装器运行，还是被直接调用？
-    # 检查 argv[1] 是否是工具名 (例如: python zig_wrapper.py cc -c main.c)
+    # Logical judgment: run as wrapper, or called directly?
+    # Check if argv[1] is a tool name (e.g., python zig_wrapper.py cc -c main.c)
     if len(sys.argv) >= 2 and sys.argv[1] in TOOL_MAP:
         run_tool(sys.argv[1], sys.argv[2:])
     else:
-        # 默认行为：生成工具链
+        # Default behavior: generate toolchain
         generate_aliases()
 
 if __name__ == "__main__":

@@ -19,23 +19,23 @@ def remove_readonly(func, path, _):
     func(path)
 
 def main():
-    parser = argparse.ArgumentParser(description="构建第三方依赖库")
+    parser = argparse.ArgumentParser(description="Build third-party dependencies")
     parser.add_argument(
         "lib",
         nargs="?",
         choices=["mpp", "rga", "ffmpeg", "spdlog", "all"],
         default="all",
-        help="指定要编译的库 (默认: all)"
+        help="Library to build (default: all)"
     )
     parser.add_argument(
         "-R", "--rebuild",
         action="store_true",
-        help="强制重新构建 (删除 temp 目录)"
+        help="Force rebuild (delete temp directory)"
     )
     parser.add_argument(
         "-D", "--deploy",
         action="store_true",
-        help="部署构建结果到统一目录 (temp/install)"
+        help="Deploy build results to unified directory (temp/install)"
     )
     args = parser.parse_args()
 
@@ -43,7 +43,7 @@ def main():
     lib_dir = config.SCRIPT_DIR / "lib"
     os.chdir(lib_dir)
 
-    # 清除 sys.argv 避免子模块的 argparse 报错
+    # Clear sys.argv to avoid argparse errors in submodules
     sys.argv = [sys.argv[0]]
 
     build_map = {
