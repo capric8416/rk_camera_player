@@ -8,20 +8,6 @@ from pathlib import Path
 SRC_DIR = Path("camera_player/src")
 EXTENSIONS = {".cpp", ".hpp", ".c", ".h"}
 
-CROSS_DIR = "cross-aarch64-linux-gnu.2.17"
-if os.name == "nt":
-    PYTHON_ENV_BIN_DIR = "env.win/Scripts"
-else:
-    PYTHON_ENV_BIN_DIR = "env.nix/bin"
-
-def setup_environment():
-    """Adds the python environment bin directory to PATH."""
-    script_dir = Path(__file__).parent.resolve()
-    env_bin = script_dir / PYTHON_ENV_BIN_DIR
-    
-    if env_bin.exists():
-        os.environ["PATH"] = str(env_bin) + os.pathsep + os.environ["PATH"]
-
 def get_source_files(src_dir):
     """Recursively finds all source files with matching extensions."""
     source_files = []
