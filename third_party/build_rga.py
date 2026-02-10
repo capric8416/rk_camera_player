@@ -23,31 +23,33 @@ from pathlib import Path
 # Paths relative to this script
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent
-CROSS_DIR_NAME = "cross-aarch64-linux-gnu.2.17"
+CROSS_DIR_NAME = "cross_toolchains"
 CROSS_DIR = PROJECT_ROOT / CROSS_DIR_NAME
+CROSS_TARGET = os.environ["CROSS_TARGET"]
 
 # RGA 目录结构
-RGA_DIR = SCRIPT_DIR / "rga"
+RGA_DIR = SCRIPT_DIR / "temp" / "rga"
 SRC_DIR = RGA_DIR / "src"
 BUILD_DIR = RGA_DIR / "build"
 INSTALL_DIR = RGA_DIR / "install"
 
 # 确定平台相关的 Meson Cross File 和 Python Env
 if os.name == "nt":
-    MESON_CROSS_FILE = CROSS_DIR / "cross-file.win.meson"
+    MESON_CROSS_FILE = CROSS_DIR / f"cross-file.win.{CROSS_TARGET}.meson"
     PYTHON_ENV_BIN_DIR = "env.win/Scripts"
 else:
-    MESON_CROSS_FILE = CROSS_DIR / "cross-file.nix.meson"
+    MESON_CROSS_FILE = CROSS_DIR / f"cross-file.nix.{CROSS_TARGET}.meson"
     PYTHON_ENV_BIN_DIR = "env.nix/bin"
 
 def setup_environment():
     """设置交叉编译环境变量"""
-    # 添加交叉编译工具链到 PATH
-    cross_bin = CROSS_DIR / PYTHON_ENV_BIN_DIR
-    os.environ["PATH"] = str(cross_bin) + os.pathsep + os.environ.get("PATH", "")
     
-    print(f"Toolchain path added: {cross_bin}")
-    print(f"Using Cross file: {MESON_CROSS_FILE}")
+    # 将工具链路径加入 PATH
+    os.environ["PATH"] = os.pathsep.join([
+        str(CROSS_DIR / CROSS_TARGET),
+        os.environ.get("PATH", "")
+    ])
+    print(f"Toolchain path added: {CROSS_DIR / CROSS_TARGET}")
 
 def run_cmd(cmd, cwd=None):
     """运行命令并检查返回码"""

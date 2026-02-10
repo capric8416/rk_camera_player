@@ -1,0 +1,10 @@
+prefix=${pcfiledir}/../../..
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${pcfiledir}/..
+
+Name: avutil
+Description: Multimedia utilities
+Version: 59.39.100
+Libs: -L${libdir} -lavutil -pthread -lm
+Cflags: -I${includedir} -pthread

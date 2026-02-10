@@ -20,27 +20,25 @@ from pathlib import Path
 # Paths relative to this script
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent
-CROSS_DIR_NAME = "cross-aarch64-linux-gnu.2.17"
+CROSS_DIR_NAME = "cross_toolchains"
 CROSS_DIR = PROJECT_ROOT / CROSS_DIR_NAME
-TOOLCHAIN_FILE = CROSS_DIR / "toolchain.cmake"
+CROSS_TARGET = os.environ["CROSS_TARGET"]
+TOOLCHAIN_FILE = CROSS_DIR / f"toolchain.{CROSS_TARGET}.cmake"
 
-SPDLOG_DIR = SCRIPT_DIR / "spdlog"
+SPDLOG_DIR = SCRIPT_DIR / "temp" / "spdlog"
 SRC_DIR = SPDLOG_DIR / "src"
 BUILD_DIR = SPDLOG_DIR / "build"
 INSTALL_DIR = SPDLOG_DIR / "install"
 
 def setup_environment():
-    """Setup environment variables for cross-compilation"""
-    if os.name == "nt":
-        python_env_bin_dir = "env.win/Scripts"
-    else:
-        python_env_bin_dir = "env.nix/bin"
-    
-    # Add cross toolchain to PATH
-    cross_bin = CROSS_DIR / python_env_bin_dir
-    os.environ["PATH"] = str(cross_bin) + os.pathsep + os.environ.get("PATH", "")
-    
-    print(f"Toolchain path added: {cross_bin}")
+    """设置交叉编译环境变量"""
+
+    # 将工具链路径加入 PATH
+    os.environ["PATH"] = os.pathsep.join([
+        str(CROSS_DIR / CROSS_TARGET),
+        os.environ.get("PATH", "")
+    ])
+    print(f"Toolchain path added: {CROSS_DIR / CROSS_TARGET}")
 
 def run_cmd(cmd, cwd=None):
     """Run a command and check return code"""

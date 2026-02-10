@@ -1,0 +1,11 @@
+prefix=${pcfiledir}/../../..
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${pcfiledir}/..
+
+Name: avcodec
+Description: Multimedia codecs
+Version: 61.19.101
+Requires: libavutil
+Libs: -L${libdir} -lavcodec -pthread -lm
+Cflags: -I${includedir} -pthread

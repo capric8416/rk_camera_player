@@ -10,6 +10,8 @@ import re
 from pathlib import Path
 from collections import defaultdict
 
+CROSS_TARGET = os.environ["CROSS_TARGET"]
+
 def get_lib_base_name(filename):
     """提取库基础名称 (不含版本号)"""
     # libQt5Core.so.5.15.18 -> libQt5Core
@@ -126,18 +128,19 @@ def rebuild_symlinks(directory, dry_run=True):
             print(f"创建软链失败 {link_path.name}: {e}")
 
 def main():
-    rebuild_symlinks("lib", dry_run=False)
+    cwd = os.getcwd()
+    lib_dir = f"{Path(__file__).parent}/lib/{CROSS_TARGET}"
+    os.chdir(lib_dir)
+    rebuild_symlinks(lib_dir, dry_run=False)
+    os.chdir(cwd)
 
 
 if __name__ == "__main__":
     import sys
     
     if len(sys.argv) < 2:
-        print("用法: python rebuild_so_symlinks.py <目录> [--execute]")
-        print("示例: python rebuild_so_symlinks.py ./lib --execute")
-        sys.exit(1)
-
-    target_dir = sys.argv[1]
-    dry_run = "--execute" not in sys.argv
-    
-    rebuild_symlinks(target_dir, dry_run)
+        main()
+    else:
+        target_dir = sys.argv[1]
+        dry_run = "--execute" not in sys.argv
+        rebuild_symlinks(target_dir, dry_run)

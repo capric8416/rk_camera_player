@@ -1,8 +1,0 @@
-clang-format==21.1.8
-clang-tidy==21.1.6
-cmake==4.2.1
-colorama==0.4.6
-meson==1.10.1
-ninja==1.13.0
-pkgconf==2.2.0.post0
-zig-bin==0.14.1

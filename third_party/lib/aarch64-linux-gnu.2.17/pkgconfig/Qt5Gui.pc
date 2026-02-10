@@ -1,0 +1,14 @@
+prefix=${pcfiledir}/../../..
+exec_prefix=${prefix}
+libdir=${pcfiledir}/..
+includedir=${prefix}/include/qt5
+
+
+Name: Qt5 Gui
+Description: Qt Gui module
+Version: 5.15.18
+
+
+Libs: "-L${libdir}" -lQt5Gui -lQt5Core -lm -lpcre2-16 -lpng16 -lz -lpthread -lharfbuzz -lstdc++ -lfreetype -lpng16 -lz -lm
+Requires: Qt5Core
+Cflags: -DQT_GUI_LIB "-I${includedir}/QtGui" "-I${includedir}"

@@ -27,11 +27,12 @@ from pathlib import Path
 # Paths relative to this script
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent
-CROSS_DIR_NAME = "cross-aarch64-linux-gnu.2.17"
+CROSS_DIR_NAME = "cross_toolchains"
 CROSS_DIR = PROJECT_ROOT / CROSS_DIR_NAME
+CROSS_TARGET = os.environ["CROSS_TARGET"]
 
 # FFmpeg 目录结构
-FFMPEG_DIR = SCRIPT_DIR / "ffmpeg"
+FFMPEG_DIR = SCRIPT_DIR / "temp" / "ffmpeg"
 FFMPEG_SRC = FFMPEG_DIR / "src"
 BUILD_DIR = FFMPEG_DIR / "build" 
 INSTALL_DIR = FFMPEG_DIR / "install"
@@ -43,25 +44,22 @@ COMPAT_LIB = SCRIPT_DIR / "libcompat_random.a"
 
 # 确定平台相关的 Python Env bin 目录
 if os.name == "nt":
-    PYTHON_ENV_BIN_DIR = "env.win/Scripts"
     EXE_EXT = ".cmd"
 else:
-    PYTHON_ENV_BIN_DIR = "env.nix/bin"
     EXE_EXT = ""
 
 def setup_environment():
     """设置交叉编译环境变量"""
-    cross_bin = CROSS_DIR / PYTHON_ENV_BIN_DIR
     msys2_bin = CROSS_DIR / "msys2" / "usr" / "bin"
     
     # 将工具链路径加入 PATH
     os.environ["PATH"] = os.pathsep.join([
         str(CROSS_DIR),
-        str(cross_bin),
+        str(CROSS_DIR / CROSS_TARGET),
         str(msys2_bin),
         os.environ.get("PATH", "")
     ])
-    print(f"Toolchain path added: {cross_bin}")
+    print(f"Toolchain path added: {CROSS_DIR / CROSS_TARGET}")
 
 def run_cmd(cmd, cwd=None, env=None):
     """运行命令并检查返回码"""
@@ -231,9 +229,8 @@ def build():
         # Need to capture output, so using subprocess.check_output directly with env
         env = os.environ.copy()
         # Add toolchain to path just in case
-        cross_bin = CROSS_DIR / PYTHON_ENV_BIN_DIR
         msys2_bin = CROSS_DIR / "msys2" / "usr" / "bin"
-        env["PATH"] = os.pathsep.join([str(CROSS_DIR), str(cross_bin), str(msys2_bin), env.get("PATH", "")])
+        env["PATH"] = os.pathsep.join([str(CROSS_DIR), str(CROSS_DIR / CROSS_TARGET), str(msys2_bin), env.get("PATH", "")])
         
         output = subprocess.check_output(
             ["make", "-f", str(mkdirs_mak), "print_dirs"],

@@ -20,16 +20,15 @@ import argparse
 from pathlib import Path
 
 SRC_DIR = "camera_player"
-CROSS_DIR = "cross-aarch64-linux-gnu.2.17"
+CROSS_DIR = "cross_toolchains"
+CROSS_TARGET = os.environ["CROSS_TARGET"]
 THIRD_PARTY_DIR = "third_party"
 if os.name == "nt":
     BUILD_DIR = "builddir.win"
-    PYTHON_ENV_BIN_DIR = "env.win/Scripts"
-    MESON_CROSS_FILE = "cross-file.win.meson"
+    MESON_CROSS_FILE = f"cross-file.win.{CROSS_TARGET}.meson"
 else:
     BUILD_DIR = "builddir.nix"
-    PYTHON_ENV_BIN_DIR = "env.nix/bin"
-    MESON_CROSS_FILE = "cross-file.nix.meson"
+    MESON_CROSS_FILE = f"cross-file.nix.{CROSS_TARGET}.meson"
 
 def setup_environment():
     """设置环境变量"""
@@ -39,15 +38,22 @@ def setup_environment():
     
     # 添加交叉编译工具链到 PATH
     path_additions = [
-        str(cross_dir / PYTHON_ENV_BIN_DIR),
+        str(cross_dir / CROSS_TARGET),
         str(third_party_dir / "tools" / "qt5" / "bin")
     ]
     os.environ["PATH"] = os.pathsep.join(path_additions) + os.pathsep + os.environ.get("PATH", "")
+    print("PATH:", os.environ["PATH"])
     
     # 添加 *.pc 路径
-    pkg_config_path = third_party_dir / "lib" / "pkgconfig"
+    pkg_config_path = third_party_dir / "lib" / CROSS_TARGET / "pkgconfig"
     os.environ["PKG_CONFIG_PATH"] = str(pkg_config_path)
     os.environ["PKG_CONFIG_SYSROOT_DIR"] = ""
+    print("PKG_CONFIG_PATH:", os.environ["PKG_CONFIG_PATH"])
+    
+    # 设置 CMAKE_PREFIX_PATH 使得 CMake 能找到 third_party 中的库 (如 rapidyaml)
+    cmake_config_dir = third_party_dir / "lib" / CROSS_TARGET / "cmake"
+    os.environ["CMAKE_PREFIX_PATH"] = str(cmake_config_dir)
+    print("CMAKE_PREFIX_PATH:", os.environ["CMAKE_PREFIX_PATH"])
     
     return script_dir, cross_dir
 

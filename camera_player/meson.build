@@ -37,6 +37,9 @@ qt5 = import('qt5')
 system_inc_dirs = include_directories(
     '../third_party/include',
     '../third_party/include/qt5',
+    '../third_party/include/qt5/QtCore',
+    '../third_party/include/qt5/QtGui',
+    '../third_party/include/qt5/QtWidgets',
     '../third_party/include/libdrm',
     is_system: true,
 )
