@@ -133,6 +133,9 @@ def rebuild_symlinks(directory, dry_run=True):
 def main():
     cwd = os.getcwd()
     lib_dir = config.LIB_DIR
+    if not lib_dir.exists():
+        print(f"Library directory {lib_dir} does not exist")
+        return
     os.chdir(lib_dir)
     rebuild_symlinks(lib_dir, dry_run=False)
     os.chdir(cwd)

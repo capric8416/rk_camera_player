@@ -31,11 +31,6 @@ FFMPEG_SRC = FFMPEG_DIR / "src"
 BUILD_DIR = FFMPEG_DIR / "build" 
 INSTALL_DIR = FFMPEG_DIR / "install"
 
-# Compatibility Shim
-COMPAT_SRC = config.SCRIPT_DIR / "compat_random.c"
-COMPAT_OBJ = config.SCRIPT_DIR / "compat_random.o"
-COMPAT_LIB = config.SCRIPT_DIR / "libcompat_random.a"
-
 def clone():
     """Clone FFmpeg repository"""
     if FFMPEG_SRC.exists():
@@ -51,17 +46,6 @@ def clone():
         str(FFMPEG_SRC)
     ]
     config.run_cmd(cmd)
-
-def build_compat_shim():
-    """Build compat_random.c"""
-    if COMPAT_SRC.exists():
-        print("Compiling compat_random.c...")
-        cc_cmd = ["zig-cc", "-c", str(COMPAT_SRC), "-o", str(COMPAT_OBJ)]
-        ar_cmd = ["zig-ar", "rcs", str(COMPAT_LIB), str(COMPAT_OBJ)]
-        config.run_cmd(cc_cmd)
-        config.run_cmd(ar_cmd)
-        return True
-    return False
 
 def configure():
     """Configure FFmpeg"""
@@ -79,16 +63,6 @@ def configure():
     # Create a local temporary directory to avoid using system TEMP (prevents path issues with spaces/backslashes)
     LOCAL_TMP_DIR = BUILD_DIR / "tmp"
     LOCAL_TMP_DIR.mkdir(exist_ok=True)
-
-    # Try to build compat shim
-    has_compat = build_compat_shim()
-
-    extra_ldflags = ""
-    # Note: paths must be converted to POSIX format, otherwise LDFLAGS will have issues
-    if has_compat and COMPAT_LIB.exists():
-        extra_ldflags = COMPAT_LIB.as_posix()
-    elif "COMPAT_LIB" in os.environ:
-         extra_ldflags = os.environ["COMPAT_LIB"]
 
     configure_script = FFMPEG_SRC / "configure"
     
@@ -144,9 +118,6 @@ def configure():
         "--disable-pthreads",
         "--disable-optimizations",
         "--disable-asm",
-        
-        # === Extra Flags ===
-        f"--extra-ldflags={extra_ldflags}"
     ]
 
     # [CRITICAL] Force set TMPDIR to the posix path we created

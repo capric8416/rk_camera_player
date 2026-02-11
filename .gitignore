@@ -8,3 +8,5 @@ third_party/temp/
 cross_toolchains/msys2
 cross_toolchains/llvm-nm.exe
 cross_toolchains/aarch64-linux-gnu.2.17
+cross_toolchains/x86_64-linux-gnu.2.17
+cross_toolchains/arm-linux-gnueabihf.2.17
