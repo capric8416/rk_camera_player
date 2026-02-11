@@ -45,7 +45,8 @@ def generate_aliases():
             # Generate Windows Batch scripts (for CMD / PowerShell)
             # -------------------------------------------------
             cmd_path = BIN_DIR / (f"zig-{tool}.cmd")
-            batch_content = f'@echo off\n\n{PYTHON_BIN} "{WRAPPER_SCRIPT}" {tool} %*\n'
+            # Use sys.executable to bypass mise shims and significantly improve startup performance on Windows
+            batch_content = f'@echo off\n\n"{sys.executable}" "{WRAPPER_SCRIPT}" {tool} %*\n'
             
             with open(cmd_path, "w", encoding="utf-8") as f:
                 f.write(batch_content)
@@ -57,7 +58,7 @@ def generate_aliases():
             # -------------------------------------------------
             sh_path = BIN_DIR / f"zig-{tool}"
             # Use "$@" to pass all arguments
-            sh_content = f'#!/bin/sh\n\n{PYTHON_BIN} "{WRAPPER_SCRIPT.as_posix()}" {tool} "$@"\n'
+            sh_content = f'#!/bin/sh\n\n"{sys.executable}" "{WRAPPER_SCRIPT.as_posix()}" {tool} "$@"\n'
         
             with open(sh_path, "w", encoding="utf-8", newline='\n') as f:
                 f.write(sh_content)
@@ -101,10 +102,10 @@ def run_tool(tool_name, args):
 
 def main():
     # Add environment variables
-    os.environ["PATH"] = os.pathsep.join([
-        str(BIN_DIR),
-        os.environ["PATH"]
-    ])
+    bin_dir_str = str(BIN_DIR)
+    current_path = os.environ.get("PATH", "")
+    if bin_dir_str not in current_path:
+        os.environ["PATH"] = bin_dir_str + os.pathsep + current_path
     
     # If parameters is 'gen', or no parameters and run by double-clicking, generate toolchain
     if len(sys.argv) == 2 and sys.argv[1] == "gen":

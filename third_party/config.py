@@ -35,7 +35,10 @@ def setup_env():
         if msys2_bin.exists():
             paths.append(str(msys2_bin))
 
-    os.environ["PATH"] = os.pathsep.join(paths + [os.environ.get("PATH", "")])
+    current_path = os.environ.get("PATH", "")
+    new_paths = [p for p in paths if p not in current_path]
+    if new_paths:
+        os.environ["PATH"] = os.pathsep.join(new_paths + [current_path])
     print(f"Environment set up. Toolchain: {CROSS_TARGET}")
 
 def run_cmd(cmd, cwd=None, env=None):
