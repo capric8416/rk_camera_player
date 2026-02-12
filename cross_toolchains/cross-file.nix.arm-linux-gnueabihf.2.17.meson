@@ -1,0 +1,24 @@
+[binaries]
+c = 'zig-cc'
+cpp = 'zig-c++'
+ar = 'zig-ar'
+strip = 'zig-strip'
+ranlib = 'zig-ranlib'
+libtool = 'zig-libtool'
+pkg-config = 'pkgconf'
+cmake = 'cmake'
+
+[built-in options]
+c_args = []
+cpp_args = ['-fpermissive']
+c_link_args = []
+cpp_link_args = []
+
+[properties]
+sys_root = ''
+
+[host_machine]
+system = 'linux'
+cpu_family = 'arm'
+cpu = 'armv7-a'
+endian = 'little'

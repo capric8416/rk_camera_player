@@ -1,0 +1,10 @@
+prefix=${pcfiledir}/../../..
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${pcfiledir}/..
+
+Name: libdrm
+Description: Userspace interface to kernel DRM services
+Version: 2.4.107
+Libs: -L${libdir} -ldrm
+Cflags: -I${includedir} -I${includedir}/libdrm

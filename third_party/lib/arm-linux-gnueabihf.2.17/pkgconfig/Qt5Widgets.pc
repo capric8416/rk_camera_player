@@ -1,0 +1,14 @@
+prefix=${pcfiledir}/../../..
+exec_prefix=${prefix}
+libdir=${pcfiledir}/..
+includedir=${prefix}/include/qt5
+
+
+Name: Qt5 Widgets
+Description: Qt Widgets module
+Version: 5.15.18
+
+
+Libs: "-L${libdir}" -lQt5Widgets -lQt5Gui -lQt5Core -lm -lpcre2-16 -lpng16 -lz -lpthread -lstdc++ -lfreetype -lpng16 -lz -lm
+Requires: Qt5Core Qt5Gui
+Cflags: -DQT_WIDGETS_LIB "-I${includedir}/QtWidgets" "-I${includedir}"
