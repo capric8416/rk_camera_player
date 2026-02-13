@@ -8,7 +8,7 @@ python = "3.14"
 _.path = ["{% if os() == 'windows' %}{{env.LOCALAPPDATA}}\\mise\\installs\\python\\3.14.3\\Scripts{% endif %}"]
 CROSS_TARGET = "aarch64-linux-gnu.2.17"
 # CROSS_TARGET = "x86_64-linux-gnu.2.17"
-# CROSS_TARGET = "arm-linux-gnueabihf.2.17"
+# ROSS_TARGET = "arm-linux-gnueabihf.2.17"
 
 [tasks.bootstrap]
 alias = "bs"

@@ -72,14 +72,14 @@ bool RgaScaler::convert(
     dst_buf.hstride = static_cast<int>(m_dst_height);
     dst_buf.format = RK_FORMAT_RGBA_8888;
 
-    // 执行颜色空间转换
-    IM_STATUS status =
-        imcvtcolor(src_buf, dst_buf, src_buf.format, dst_buf.format);
+    // // 执行颜色空间转换
+    // IM_STATUS status =
+    //     imcvtcolor(src_buf, dst_buf, src_buf.format, dst_buf.format);
 
-    if (status != IM_STATUS_SUCCESS) {
-        LOG_ERROR("RGA imcvtcolor 失败: {}", imStrError(status));
-        return false;
-    }
+    // if (status != IM_STATUS_SUCCESS) {
+    //     LOG_ERROR("RGA imcvtcolor 失败: {}", imStrError(status));
+    //     return false;
+    // }
 
     return true;
 }

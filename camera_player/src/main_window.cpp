@@ -20,6 +20,19 @@
 static const QString STYLE_DIR = ":/resources/style";
 static const QString TRANSLATIONS_DIR = ":/translations/";
 
+// Helper to avoid ABI mismatch with QString::split (Qt 5.14 changed SplitBehavior type)
+static QStringList split_string(const QString &str, const QString &sep) {
+    QStringList result;
+    int start = 0;
+    int end = 0;
+    while ((end = str.indexOf(sep, start)) != -1) {
+        result.append(str.mid(start, end - start));
+        start = end + sep.length();
+    }
+    result.append(str.mid(start));
+    return result;
+}
+
 // ============================================================================
 // MainWindow 实现
 // ============================================================================
@@ -402,7 +415,7 @@ double MainWindow::parse_fps_from_meta(const QString &video_path)
 
     // 解析 fps: {basename}_{fps}_{frames}.jpeg
     QString meta_name = QFileInfo(meta_files.first()).completeBaseName();
-    QStringList parts = meta_name.split('_');
+    QStringList parts = split_string(meta_name, "_");
     if (parts.size() >= 2) {
         // 倒数第二个是 fps
         QString fps_str = parts[parts.size() - 2];
@@ -433,7 +446,7 @@ uint32_t MainWindow::parse_frames_from_meta(const QString &video_path)
 
     // 解析 frames: {basename}_{fps}_{frames}.jpeg
     QString meta_name = QFileInfo(meta_files.first()).completeBaseName();
-    QStringList parts = meta_name.split('_');
+    QStringList parts = split_string(meta_name, "_");
     if (parts.size() >= 1) {
         // 最后一个是 frames
         QString frames_str = parts.last();
@@ -616,6 +629,7 @@ void MainWindow::start_camera()
 
     player::PlayerConfig config;
     config.camera_device = "/dev/video51";
+    // config.camera_device = "/dev/video0";
     config.drm_device = "/dev/dri/card0";
     config.width = 1280;
     config.height = 720;
@@ -698,7 +712,7 @@ void MainWindow::load_translation()
 
     if (!m_translator->load(qmFile)) {
         // 如果失败，尝试只用语言代码（如 zh）
-        QString langCode = locale.split('_').first();
+        QString langCode = split_string(locale, "_").first();
         qmFile = TRANSLATIONS_DIR + langCode + ".qm";
 
         if (!m_translator->load(qmFile)) {

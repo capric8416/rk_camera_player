@@ -18,9 +18,9 @@ StdinCommandHandler::StdinCommandHandler(
         new QSocketNotifier(STDIN_FILENO, QSocketNotifier::Read, this);
     connect(
         m_stdin_notifier,
-        &QSocketNotifier::activated,
+        SIGNAL(activated(int)),
         this,
-        &StdinCommandHandler::on_stdin_ready
+        SLOT(on_stdin_ready())
     );
     LOG_INFO("Stdin command listener started. Type 'help' for commands.");
 }

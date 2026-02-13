@@ -38,10 +38,10 @@ void PlayerThread::stop_player()
         m_player->stop();
     }
     if (isRunning()) {
-        wait(3000); // 等待最多3秒
+        wait(static_cast<unsigned long>(3000)); // 等待最多3秒
         if (isRunning()) {
             terminate();
-            wait();
+            wait(static_cast<unsigned long>(-1));
         }
     }
 }
