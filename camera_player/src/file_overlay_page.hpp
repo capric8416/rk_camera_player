@@ -2,6 +2,7 @@
 #define FILE_OVERLAY_PAGE_H
 
 #include <QElapsedTimer>
+#include <QLabel>
 #include <QPushButton>
 #include <QStringList>
 #include <QTimer>
@@ -49,6 +50,11 @@ public:
      * 获取当前视频路径
      */
     QString current_video_path() const;
+
+    /**
+     * 更新翻译
+     */
+    void translateUi();
 
     /**
      * 获取当前索引
@@ -114,6 +120,9 @@ private:
 
     // 删除确认菜单
     QWidget *m_confirm_menu;
+    QLabel *m_confirm_label;
+    QPushButton *m_cancel_btn;
+    QPushButton *m_confirm_btn;
 
     static constexpr int DOUBLE_CLICK_MS = 300;
     static constexpr int LONG_PRESS_MS = 1000;

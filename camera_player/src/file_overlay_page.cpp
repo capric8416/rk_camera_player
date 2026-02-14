@@ -116,10 +116,10 @@ void FileOverlayPage::create_action_menu()
     layout->setSpacing(10);
     layout->setContentsMargins(20, 20, 20, 20);
 
-    m_back_btn = new QPushButton(tr("返回"), m_action_menu);
-    m_prev_btn = new QPushButton(tr("上一个"), m_action_menu);
-    m_next_btn = new QPushButton(tr("下一个"), m_action_menu);
-    m_delete_btn = new QPushButton(tr("删除"), m_action_menu);
+    m_back_btn = new QPushButton(tr("Return"), m_action_menu);
+    m_prev_btn = new QPushButton(tr("Previous"), m_action_menu);
+    m_next_btn = new QPushButton(tr("Next"), m_action_menu);
+    m_delete_btn = new QPushButton(tr("Delete"), m_action_menu);
     m_delete_btn->setStyleSheet(
         "QPushButton { background-color: #a00; } QPushButton:pressed { "
         "background-color: #c00; }"
@@ -178,27 +178,27 @@ void FileOverlayPage::create_action_menu()
     );
 
     auto *confirmLayout = new QVBoxLayout(m_confirm_menu);
-    auto *confirmLabel = new QLabel(tr("确认删除?"), m_confirm_menu);
-    confirmLabel->setAlignment(Qt::AlignCenter);
+    m_confirm_label = new QLabel(tr("Confirm Delete?"), m_confirm_menu);
+    m_confirm_label->setAlignment(Qt::AlignCenter);
 
     auto *btnLayout = new QHBoxLayout();
-    auto *cancelBtn = new QPushButton(tr("取消"), m_confirm_menu);
-    auto *confirmBtn = new QPushButton(tr("确认"), m_confirm_menu);
-    confirmBtn->setStyleSheet(
+    m_cancel_btn = new QPushButton(tr("Cancel"), m_confirm_menu);
+    m_confirm_btn = new QPushButton(tr("Confirm"), m_confirm_menu);
+    m_confirm_btn->setStyleSheet(
         "QPushButton { background-color: #a00; } QPushButton:pressed { "
         "background-color: #c00; }"
     );
 
-    btnLayout->addWidget(cancelBtn);
-    btnLayout->addWidget(confirmBtn);
+    btnLayout->addWidget(m_cancel_btn);
+    btnLayout->addWidget(m_confirm_btn);
 
-    confirmLayout->addWidget(confirmLabel);
+    confirmLayout->addWidget(m_confirm_label);
     confirmLayout->addLayout(btnLayout);
     m_confirm_menu->setLayout(confirmLayout);
     m_confirm_menu->adjustSize();
     m_confirm_menu->hide();
 
-    connect(cancelBtn, &QPushButton::clicked, this, [this]() {
+    connect(m_cancel_btn, &QPushButton::clicked, this, [this]() {
         m_confirm_menu->hide();
     });
 }
@@ -281,4 +281,15 @@ bool FileOverlayPage::eventFilter(QObject *obj, QEvent *event)
     }
 
     return QWidget::eventFilter(obj, event);
+}
+
+void FileOverlayPage::translateUi()
+{
+    m_back_btn->setText(tr("Return"));
+    m_prev_btn->setText(tr("Previous"));
+    m_next_btn->setText(tr("Next"));
+    m_delete_btn->setText(tr("Delete"));
+    m_confirm_label->setText(tr("Confirm Delete?"));
+    m_cancel_btn->setText(tr("Cancel"));
+    m_confirm_btn->setText(tr("Confirm"));
 }

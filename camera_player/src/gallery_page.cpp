@@ -202,6 +202,7 @@ GalleryPage::GalleryPage(QWidget *parent)
     confirmLayout->setSpacing(12);
 
     QLabel *confirmLabel = new QLabel(tr("Confirm Delete?"), m_confirm_menu);
+    m_confirm_label = confirmLabel;
     confirmLabel->setStyleSheet(
         "color: white; font-size: 16px; background-color: transparent;"
     );
@@ -212,6 +213,7 @@ GalleryPage::GalleryPage(QWidget *parent)
     confirmBtnLayout->setSpacing(20);
 
     QPushButton *cancelBtn = new QPushButton(tr("Cancel"), m_confirm_menu);
+    m_cancel_btn = cancelBtn;
     cancelBtn->setStyleSheet(
         "QPushButton { background-color: #4CAF50; color: white; font-size: "
         "16px; padding: 8px; border-radius: 4px; }"
@@ -226,6 +228,7 @@ GalleryPage::GalleryPage(QWidget *parent)
     confirmBtnLayout->addWidget(cancelBtn);
 
     QPushButton *yesBtn = new QPushButton(tr("Yes"), m_confirm_menu);
+    m_yes_btn = yesBtn;
     yesBtn->setStyleSheet(
         "QPushButton { background-color: #f44336; color: white; font-size: "
         "16px; padding: 8px; border-radius: 4px; }"
@@ -640,4 +643,14 @@ void GalleryPage::handle_fullscreen_long_press()
     show_action_menu();
 
     LOG_INFO("on_fullscreen_long_press finished");
+}
+
+void GalleryPage::translateUi()
+{
+    ui->titleLabel->setText(tr("Gallery"));
+    m_return_btn->setText(tr("Return"));
+    m_delete_btn->setText(tr("Delete"));
+    m_confirm_label->setText(tr("Confirm Delete?"));
+    m_cancel_btn->setText(tr("Cancel"));
+    m_yes_btn->setText(tr("Yes"));
 }

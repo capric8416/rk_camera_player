@@ -54,8 +54,6 @@ def format_files(files):
     print(f"Errors:  {error_count}")
 
 def main(path: str):
-    setup_environment()
-    
     if path and os.path.isfile(path):
         format_files([Path(path)])
     else:

@@ -38,6 +38,11 @@ public:
      */
     void refresh();
 
+    /**
+     * 更新翻译
+     */
+    void translateUi();
+
 signals:
     /**
      * 返回按钮点击信号
@@ -97,6 +102,9 @@ private:
 
     // 删除确认菜单
     QWidget *m_confirm_menu;
+    QLabel *m_confirm_label;
+    QPushButton *m_cancel_btn;
+    QPushButton *m_yes_btn;
 
     // 数据
     QString m_videos_dir;

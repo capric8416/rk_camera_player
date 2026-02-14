@@ -24,6 +24,7 @@ signals:
 
 public slots:
     void update_date_time();
+    void translateUi();
 
 private:
     void load_icons();

@@ -39,6 +39,11 @@ public:
     void refresh();
 
     /**
+     * 更新翻译
+     */
+    void translateUi();
+
+    /**
      * 隐藏操作菜单
      */
     void hide_action_menu();
@@ -88,6 +93,9 @@ private:
 
     // 删除确认菜单
     QWidget *m_confirm_menu;
+    QLabel *m_confirm_label;
+    QPushButton *m_cancel_btn;
+    QPushButton *m_yes_btn;
 
     // 数据
     QString m_images_dir;

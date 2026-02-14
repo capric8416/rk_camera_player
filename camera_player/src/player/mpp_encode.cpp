@@ -10,7 +10,7 @@
 #include <cstring>
 
 #ifndef MPP_ALIGN
-#define MPP_ALIGN(x, a) (((x) + (a)-1) & ~((a)-1))
+#define MPP_ALIGN(x, a) (((x) + (a) - 1) & ~((a) - 1))
 #endif
 
 namespace player {
@@ -390,8 +390,10 @@ bool MppEncoder::start()
             if (!m_header_data.empty()) {
                 mux_cfg.extradata = m_header_data;
             } else {
-                LOG_WARN("Starting MP4 muxer without extradata (headers may be "
-                         "missing)");
+                LOG_WARN(
+                    "Starting MP4 muxer without extradata (headers may be "
+                    "missing)"
+                );
             }
 
             if (!m_muxer->open(mux_cfg)) {

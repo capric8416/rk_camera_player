@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ja">
+<context>
+    <name>LauncherPage</name>
+    <message>
+        <source>Gallery</source>
+        <translation>ギャラリー</translation>
+    </message>
+    <message>
+        <source>Videos</source>
+        <translation>ビデオ</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>設定</translation>
+    </message>
+    <message>
+        <source>Back</source>
+        <translation>戻る</translation>
+    </message>
+</context>
+<context>
+    <name>CameraOverlayPage</name>
+    <message>
+        <source>image mode</source>
+        <translation>撮影モード</translation>
+    </message>
+    <message>
+        <source>video mode</source>
+        <translation>録画モード</translation>
+    </message>
+</context>
+<context>
+    <name>GalleryPage</name>
+    <message>
+        <source>Gallery</source>
+        <translation>ギャラリー</translation>
+    </message>
+    <message>
+        <source>Action</source>
+        <translation>操作</translation>
+    </message>
+    <message>
+        <source>Choose action:</source>
+        <translation>操作を選択:</translation>
+    </message>
+    <message>
+        <source>Return</source>
+        <translation>戻る</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <source>Confirm Delete</source>
+        <translation>削除の確認</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to delete %1?</source>
+        <translation>%1 を削除してもよろしいですか？</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>エラー</translation>
+    </message>
+    <message>
+        <source>Failed to delete file.</source>
+        <translation>ファイルの削除に失敗しました。</translation>
+    </message>
+    <message>
+        <source>Confirm Delete?</source>
+        <translation>削除を確認しますか？</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>はい</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>キャンセル</translation>
+    </message>
+</context>
+<context>
+    <name>VideosPage</name>
+    <message>
+        <source>Videos</source>
+        <translation>ビデオ</translation>
+    </message>
+    <message>
+        <source>Return</source>
+        <translation>戻る</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <source>Confirm Delete?</source>
+        <translation>削除を確認しますか？</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>はい</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>キャンセル</translation>
+    </message>
+</context>
+<context>
+    <name>LanguagesPage</name>
+    <message>
+        <source>Language</source>
+        <translation>言語設定</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsPage</name>
+    <message>
+        <source>Language Setting</source>
+        <translation>言語設定</translation>
+    </message>
+    <message>
+        <source>Change Date&amp;Time</source>
+        <translation>日時の変更</translation>
+    </message>
+    <message>
+        <source>Adjust Screen Brightness</source>
+        <translation>画面の明るさ</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>設定</translation>
+    </message>
+    <message>
+        <source>Back</source>
+        <translation>戻る</translation>
+    </message>
+</context>
+<context>
+    <name>FileOverlayPage</name>
+    <message>
+        <source>Return</source>
+        <translation>戻る</translation>
+    </message>
+    <message>
+        <source>Previous</source>
+        <translation>前へ</translation>
+    </message>
+    <message>
+        <source>Next</source>
+        <translation>次へ</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <source>Confirm Delete?</source>
+        <translation>削除を確認しますか？</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>キャンセル</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>確認</translation>
+    </message>
+</context>
+</TS>

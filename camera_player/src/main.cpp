@@ -10,6 +10,9 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
+    QCoreApplication::setOrganizationName("skylink");
+    QCoreApplication::setApplicationName("camera_player");
+
     player::init_logger("camera_player", "log");
 
     MainWindow window;

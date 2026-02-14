@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="th">
+<context>
+    <name>LauncherPage</name>
+    <message>
+        <source>Gallery</source>
+        <translation>แกลเลอรี</translation>
+    </message>
+    <message>
+        <source>Videos</source>
+        <translation>วิดีโอ</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>การตั้งค่า</translation>
+    </message>
+    <message>
+        <source>Back</source>
+        <translation>กลับ</translation>
+    </message>
+</context>
+<context>
+    <name>CameraOverlayPage</name>
+    <message>
+        <source>image mode</source>
+        <translation>โหมดภาพ</translation>
+    </message>
+    <message>
+        <source>video mode</source>
+        <translation>โหมดวิดีโอ</translation>
+    </message>
+</context>
+<context>
+    <name>GalleryPage</name>
+    <message>
+        <source>Gallery</source>
+        <translation>แกลเลอรี</translation>
+    </message>
+    <message>
+        <source>Action</source>
+        <translation>การดำเนินการ</translation>
+    </message>
+    <message>
+        <source>Choose action:</source>
+        <translation>เลือกการดำเนินการ:</translation>
+    </message>
+    <message>
+        <source>Return</source>
+        <translation>กลับ</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>ลบ</translation>
+    </message>
+    <message>
+        <source>Confirm Delete</source>
+        <translation>ยืนยันการลบ</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to delete %1?</source>
+        <translation>คุณแน่ใจหรือไม่ว่าต้องการลบ %1?</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>ข้อผิดพลาด</translation>
+    </message>
+    <message>
+        <source>Failed to delete file.</source>
+        <translation>ลบไฟล์ไม่สำเร็จ</translation>
+    </message>
+    <message>
+        <source>Confirm Delete?</source>
+        <translation>ยืนยันการลบ?</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>ใช่</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>ยกเลิก</translation>
+    </message>
+</context>
+<context>
+    <name>VideosPage</name>
+    <message>
+        <source>Videos</source>
+        <translation>วิดีโอ</translation>
+    </message>
+    <message>
+        <source>Return</source>
+        <translation>กลับ</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>ลบ</translation>
+    </message>
+    <message>
+        <source>Confirm Delete?</source>
+        <translation>ยืนยันการลบ?</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>ใช่</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>ยกเลิก</translation>
+    </message>
+</context>
+<context>
+    <name>LanguagesPage</name>
+    <message>
+        <source>Language</source>
+        <translation>ภาษา</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsPage</name>
+    <message>
+        <source>Language Setting</source>
+        <translation>ภาษา</translation>
+    </message>
+    <message>
+        <source>Change Date&amp;Time</source>
+        <translation>วันที่และเวลา</translation>
+    </message>
+    <message>
+        <source>Adjust Screen Brightness</source>
+        <translation>ความสว่างหน้าจอ</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>การตั้งค่า</translation>
+    </message>
+    <message>
+        <source>Back</source>
+        <translation>กลับ</translation>
+    </message>
+</context>
+<context>
+    <name>FileOverlayPage</name>
+    <message>
+        <source>Return</source>
+        <translation>กลับ</translation>
+    </message>
+    <message>
+        <source>Previous</source>
+        <translation>ก่อนหน้า</translation>
+    </message>
+    <message>
+        <source>Next</source>
+        <translation>ถัดไป</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>ลบ</translation>
+    </message>
+    <message>
+        <source>Confirm Delete?</source>
+        <translation>ยืนยันการลบ?</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>ยกเลิก</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>ยืนยัน</translation>
+    </message>
+</context>
+</TS>

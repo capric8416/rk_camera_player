@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
@@ -110,4 +110,66 @@
         <translation>取消</translation>
     </message>
 </context>
+<context>
+    <name>LanguagesPage</name>
+    <message>
+        <source>Language</source>
+        <translation>语言设置</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsPage</name>
+    <message>
+        <source>Language Setting</source>
+        <translation>语言设置</translation>
+    </message>
+    <message>
+        <source>Change Date&amp;Time</source>
+        <translation>日期时间更改</translation>
+    </message>
+    <message>
+        <source>Adjust Screen Brightness</source>
+        <translation>调节屏幕亮度</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <source>Back</source>
+        <translation>返回</translation>
+    </message>
+</context>
+<context>
+    <name>FileOverlayPage</name>
+    <message>
+        <source>Return</source>
+        <translation>返回</translation>
+    </message>
+    <message>
+        <source>Previous</source>
+        <translation>上一个</translation>
+    </message>
+    <message>
+        <source>Next</source>
+        <translation>下一个</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>删除</translation>
+    </message>
+    <message>
+        <source>Confirm Delete?</source>
+        <translation>确认删除?</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>确认</translation>
+    </message>
+</context>
 </TS>
+

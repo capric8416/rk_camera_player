@@ -11,7 +11,7 @@
 #include <cstring>
 
 #ifndef MPP_ALIGN
-#define MPP_ALIGN(x, a) (((x) + (a)-1) & ~((a)-1))
+#define MPP_ALIGN(x, a) (((x) + (a) - 1) & ~((a) - 1))
 #endif
 
 namespace player {

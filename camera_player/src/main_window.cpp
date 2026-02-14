@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QLocale>
 #include <QRegularExpression>
+#include <QSettings>
 #include "camera_overlay_page.hpp"
 #include "file_overlay_page.hpp"
 #include "gallery_page.hpp"
@@ -19,9 +20,12 @@
 
 static const QString STYLE_DIR = ":/resources/style";
 static const QString TRANSLATIONS_DIR = ":/translations/";
+static const QString SETTINGS_KEY_LANGUAGE = "settings/language";
 
-// Helper to avoid ABI mismatch with QString::split (Qt 5.14 changed SplitBehavior type)
-static QStringList split_string(const QString &str, const QString &sep) {
+// Helper to avoid ABI mismatch with QString::split (Qt 5.14 changed
+// SplitBehavior type)
+static QStringList split_string(const QString &str, const QString &sep)
+{
     QStringList result;
     int start = 0;
     int end = 0;
@@ -275,8 +279,8 @@ void MainWindow::show_videos_page()
 
 void MainWindow::show_settings_page()
 {
-    ui->galleryPage->hide_action_menu(
-    ); // Ensure any overlays are hidden if necessary
+    ui->galleryPage
+        ->hide_action_menu(); // Ensure any overlays are hidden if necessary
     ui->stackedWidget->setCurrentWidget(ui->settingsPage);
     LOG_INFO("Switched to settings page");
 }
@@ -318,15 +322,30 @@ void MainWindow::change_language(int index)
             QCoreApplication::installTranslator(m_translator);
             LOG_INFO("Loaded translation: {}", qmFile.toStdString());
 
+            // 保存语言选择
+            QSettings settings;
+            settings.setValue(SETTINGS_KEY_LANGUAGE, index);
+            settings.sync();
+            LOG_INFO("Saved language index: {}", index);
+
             // Refresh UI
             ui->retranslateUi(this);
-            ui->galleryPage->refresh();
-            ui->launcherPage->update_date_time();
 
+            // 刷新所有页面翻译
+            if (ui->launcherPage)
+                ui->launcherPage->translateUi();
+            if (ui->galleryPage)
+                ui->galleryPage->translateUi();
+            if (ui->videosPage)
+                ui->videosPage->translateUi();
             if (ui->settingsPage)
                 ui->settingsPage->translateUi();
             if (ui->languagesPage)
                 ui->languagesPage->translateUi();
+            if (ui->fileOverlayPage)
+                ui->fileOverlayPage->translateUi();
+
+            ui->launcherPage->update_date_time();
         } else {
             LOG_ERROR("Failed to load translation: {}", qmFile.toStdString());
         }
@@ -703,6 +722,42 @@ void MainWindow::load_style_sheet()
 
 void MainWindow::load_translation()
 {
+    // 检查是否有保存的语言设置
+    QSettings settings;
+    if (settings.contains(SETTINGS_KEY_LANGUAGE)) {
+        int savedIndex = settings.value(SETTINGS_KEY_LANGUAGE).toInt();
+        LOG_INFO("Restoring saved language index: {}", savedIndex);
+
+        // 不能调用 change_language()，因为此时 UI 尚未初始化
+        // 直接加载对应的 .qm 文件
+        static const QString QM_FILES[] = {
+            "en.qm",
+            "zh_CN.qm",
+            "ja.qm",
+            "ko.qm",
+            "es.qm",
+            "de.qm",
+            "uk.qm",
+            "ar.qm",
+            "pt.qm",
+            "fr.qm",
+            "ru.qm",
+            "th.qm",
+            "tr.qm",
+            "vi.qm",
+            "pl.qm"
+        };
+        int count = (int)(sizeof(QM_FILES) / sizeof(QM_FILES[0]));
+        if (savedIndex >= 0 && savedIndex < count) {
+            QString qmFile = TRANSLATIONS_DIR + QM_FILES[savedIndex];
+            if (m_translator->load(qmFile)) {
+                QCoreApplication::installTranslator(m_translator);
+                LOG_INFO("Loaded saved translation: {}", qmFile.toStdString());
+                return;
+            }
+        }
+    }
+
     // 获取系统语言
     QString locale = QLocale::system().name(); // 例如 "zh_CN", "en_US"
     LOG_INFO("System locale: {}", locale.toStdString());

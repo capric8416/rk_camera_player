@@ -145,3 +145,11 @@ bool LauncherPage::eventFilter(QObject *obj, QEvent *event)
     }
     return QWidget::eventFilter(obj, event);
 }
+
+void LauncherPage::translateUi()
+{
+    ui->galleryLabel->setText(tr("Gallery"));
+    ui->videosLabel->setText(tr("Videos"));
+    ui->settingsLabel->setText(tr("Settings"));
+    ui->backLabel->setText(tr("Back"));
+}

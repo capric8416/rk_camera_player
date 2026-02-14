@@ -128,7 +128,8 @@ void LanguagesPage::resizeEvent(QResizeEvent *event)
         int itemHeight = 65;
 
         for (int i = 0; i < ui->languageList->count(); ++i) {
-            ui->languageList->item(i)->setSizeHint(QSize(itemWidth, itemHeight)
+            ui->languageList->item(i)->setSizeHint(
+                QSize(itemWidth, itemHeight)
             );
         }
     }

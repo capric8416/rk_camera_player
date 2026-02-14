@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
@@ -82,4 +82,93 @@
         <translation>Cancel</translation>
     </message>
 </context>
+<context>
+    <name>VideosPage</name>
+    <message>
+        <source>Videos</source>
+        <translation>Videos</translation>
+    </message>
+    <message>
+        <source>Return</source>
+        <translation>Return</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Delete</translation>
+    </message>
+    <message>
+        <source>Confirm Delete?</source>
+        <translation>Confirm Delete?</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>Yes</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Cancel</translation>
+    </message>
+</context>
+<context>
+    <name>LanguagesPage</name>
+    <message>
+        <source>Language</source>
+        <translation>Language</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsPage</name>
+    <message>
+        <source>Language Setting</source>
+        <translation>Language Setting</translation>
+    </message>
+    <message>
+        <source>Change Date&amp;Time</source>
+        <translation>Change Date&amp;Time</translation>
+    </message>
+    <message>
+        <source>Adjust Screen Brightness</source>
+        <translation>Adjust Screen Brightness</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Settings</translation>
+    </message>
+    <message>
+        <source>Back</source>
+        <translation>Back</translation>
+    </message>
+</context>
+<context>
+    <name>FileOverlayPage</name>
+    <message>
+        <source>Return</source>
+        <translation>Return</translation>
+    </message>
+    <message>
+        <source>Previous</source>
+        <translation>Previous</translation>
+    </message>
+    <message>
+        <source>Next</source>
+        <translation>Next</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Delete</translation>
+    </message>
+    <message>
+        <source>Confirm Delete?</source>
+        <translation>Confirm Delete?</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Cancel</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>Confirm</translation>
+    </message>
+</context>
 </TS>
+
