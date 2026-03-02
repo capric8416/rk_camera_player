@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
 <TS version="2.1" language="ko">
 <context>
@@ -168,6 +168,54 @@
     <message>
         <source>Confirm</source>
         <translation>확인</translation>
+    </message>
+</context>
+
+<context>
+    <name>ChangeDateTimePage</name>
+    <message>
+        <source>Cancel</source>
+        <translation>취소</translation>
+    </message>
+    <message>
+        <source>12-hour</source>
+        <translation>12시간제</translation>
+    </message>
+    <message>
+        <source>Change Date&amp;Time</source>
+        <translation>날짜 시간 변경</translation>
+    </message>
+    <message>
+        <source>24-hour</source>
+        <translation>24시간제</translation>
+    </message>
+    <message>
+        <source>Month</source>
+        <translation>월</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>시간:</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>확인</translation>
+    </message>
+    <message>
+        <source>Day</source>
+        <translation>일</translation>
+    </message>
+    <message>
+        <source>Time Format:</source>
+        <translation>시간 형식:</translation>
+    </message>
+    <message>
+        <source>Date:</source>
+        <translation>날짜:</translation>
+    </message>
+    <message>
+        <source>Year</source>
+        <translation>년</translation>
     </message>
 </context>
 </TS>

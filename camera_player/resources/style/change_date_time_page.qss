@@ -1,0 +1,39 @@
+/* ChangeDateTimePage 日期时间设置页面样式 */
+
+/* 整体背景 */
+#changeDateTimePage {
+    background-color: rgb(233,233,231);
+}
+
+/* 标题栏 */
+#changeDateTimePage QLabel#titleLabel {
+    background-color: rgb(111,156,211);
+    border: none;
+    font-size: 35px;
+    color: white;
+}
+
+/* 取消按钮 */
+#changeDateTimePage QPushButton#cancelButton {
+    background-color: white;
+    text-align: center;
+    border-right: 1px groove rgb(111,156,211);
+    font-size: 20px;
+}
+
+#changeDateTimePage QPushButton#cancelButton:focus {
+    background-color: rgb(111,156,211);
+    color: white;
+}
+
+/* 确认按钮 */
+#changeDateTimePage QPushButton#confirmButton {
+    background-color: white;
+    text-align: center;
+    font-size: 20px;
+}
+
+#changeDateTimePage QPushButton#confirmButton:focus {
+    background-color: rgb(111,156,211);
+    color: white;
+}

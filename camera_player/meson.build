@@ -62,6 +62,9 @@ gui_sources = files(
     'src/videos_page.cpp',
     'src/settings_page.cpp',
     'src/languages_page.cpp',
+    'src/change_date_time_page.cpp',
+    'src/rolling_box.cpp',
+    'src/rolling_box_y.cpp',
 )
 
 # Player 源文件 (Camera Overlay)
@@ -89,6 +92,9 @@ headers = files(
     'src/videos_page.hpp',
     'src/settings_page.hpp',
     'src/languages_page.hpp',
+    'src/change_date_time_page.hpp',
+    'src/rolling_box.hpp',
+    'src/rolling_box_y.hpp',
 )
 
 # UI 文件
@@ -101,6 +107,7 @@ ui_files = files(
     'ui/videos_page.ui',
     'ui/settings_page.ui',
     'ui/languages_page.ui',
+    'ui/change_date_time_page.ui',
 )
 
 # Qt5 预处理

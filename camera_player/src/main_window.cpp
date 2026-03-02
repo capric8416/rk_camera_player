@@ -7,6 +7,7 @@
 #include <QRegularExpression>
 #include <QSettings>
 #include "camera_overlay_page.hpp"
+#include "change_date_time_page.hpp"
 #include "file_overlay_page.hpp"
 #include "gallery_page.hpp"
 #include "languages_page.hpp"
@@ -132,6 +133,12 @@ MainWindow::MainWindow(QWidget *parent)
         this,
         &MainWindow::show_languages_page
     );
+    connect(
+        ui->settingsPage,
+        &SettingsPage::datetime_setting_clicked,
+        this,
+        &MainWindow::show_change_date_time_page
+    );
 
     // 连接 languages 页面信号
     connect(
@@ -145,6 +152,14 @@ MainWindow::MainWindow(QWidget *parent)
         &LanguagesPage::language_selected,
         this,
         &MainWindow::change_language
+    );
+
+    // 连接日期时间设置页面信号
+    connect(
+        ui->changeDateTimePage,
+        &ChangeDateTimePage::back_clicked,
+        this,
+        &MainWindow::show_settings_page
     );
 
     // 连接 videos 页面信号
@@ -291,6 +306,13 @@ void MainWindow::show_languages_page()
     LOG_INFO("Switched to languages page");
 }
 
+void MainWindow::show_change_date_time_page()
+{
+    ui->changeDateTimePage->refresh();
+    ui->stackedWidget->setCurrentWidget(ui->changeDateTimePage);
+    LOG_INFO("Switched to change date time page");
+}
+
 void MainWindow::change_language(int index)
 {
     LOG_INFO("Change language requested: {}", index);
@@ -344,6 +366,8 @@ void MainWindow::change_language(int index)
                 ui->languagesPage->translateUi();
             if (ui->fileOverlayPage)
                 ui->fileOverlayPage->translateUi();
+            if (ui->changeDateTimePage)
+                ui->changeDateTimePage->translateUi();
 
             ui->launcherPage->update_date_time();
         } else {

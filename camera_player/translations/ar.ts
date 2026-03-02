@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
 <TS version="2.1" language="ar">
 <context>
@@ -168,6 +168,54 @@
     <message>
         <source>Confirm</source>
         <translation>تأكيد</translation>
+    </message>
+</context>
+
+<context>
+    <name>ChangeDateTimePage</name>
+    <message>
+        <source>Cancel</source>
+        <translation>إلغاء</translation>
+    </message>
+    <message>
+        <source>12-hour</source>
+        <translation>12 ساعة</translation>
+    </message>
+    <message>
+        <source>Change Date&amp;Time</source>
+        <translation>تغيير التاريخ والوقت</translation>
+    </message>
+    <message>
+        <source>24-hour</source>
+        <translation>24 ساعة</translation>
+    </message>
+    <message>
+        <source>Month</source>
+        <translation>شهر</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>الوقت:</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>تأكيد</translation>
+    </message>
+    <message>
+        <source>Day</source>
+        <translation>يوم</translation>
+    </message>
+    <message>
+        <source>Time Format:</source>
+        <translation>تنسيق الوقت:</translation>
+    </message>
+    <message>
+        <source>Date:</source>
+        <translation>التاريخ:</translation>
+    </message>
+    <message>
+        <source>Year</source>
+        <translation>سنة</translation>
     </message>
 </context>
 </TS>

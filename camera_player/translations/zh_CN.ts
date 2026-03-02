@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
@@ -169,6 +169,54 @@
     <message>
         <source>Confirm</source>
         <translation>确认</translation>
+    </message>
+</context>
+
+<context>
+    <name>ChangeDateTimePage</name>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>12-hour</source>
+        <translation>12小时制</translation>
+    </message>
+    <message>
+        <source>Change Date&amp;Time</source>
+        <translation>日期时间更改</translation>
+    </message>
+    <message>
+        <source>24-hour</source>
+        <translation>24小时制</translation>
+    </message>
+    <message>
+        <source>Month</source>
+        <translation>月</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>时间：</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>确认</translation>
+    </message>
+    <message>
+        <source>Day</source>
+        <translation>日</translation>
+    </message>
+    <message>
+        <source>Time Format:</source>
+        <translation>时间格式：</translation>
+    </message>
+    <message>
+        <source>Date:</source>
+        <translation>日期：</translation>
+    </message>
+    <message>
+        <source>Year</source>
+        <translation>年</translation>
     </message>
 </context>
 </TS>

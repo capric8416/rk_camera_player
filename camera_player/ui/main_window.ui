@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
@@ -46,6 +46,8 @@
       <widget class="SettingsPage" name="settingsPage"/>
       <!-- Page 6: languagesPage (语言设置页面) - Promoted to LanguagesPage -->
       <widget class="LanguagesPage" name="languagesPage"/>
+      <!-- Page 7: changeDateTimePage (日期时间设置) - Promoted to ChangeDateTimePage -->
+      <widget class="ChangeDateTimePage" name="changeDateTimePage"/>
      </widget>
     </item>
    </layout>
@@ -92,6 +94,12 @@
    <class>LanguagesPage</class>
    <extends>QWidget</extends>
    <header>languages_page.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ChangeDateTimePage</class>
+   <extends>QWidget</extends>
+   <header>change_date_time_page.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

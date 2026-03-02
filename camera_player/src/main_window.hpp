@@ -29,6 +29,7 @@ public:
     void show_videos_page();
     void show_settings_page();
     void show_languages_page();
+    void show_change_date_time_page();
 
 public slots:
     void change_language(int index);

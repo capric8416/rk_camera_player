@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
 <TS version="2.1" language="ru">
 <context>
@@ -168,6 +168,54 @@
     <message>
         <source>Confirm</source>
         <translation>Подтвердить</translation>
+    </message>
+</context>
+
+<context>
+    <name>ChangeDateTimePage</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>12-hour</source>
+        <translation>12-часовой</translation>
+    </message>
+    <message>
+        <source>Change Date&amp;Time</source>
+        <translation>Изменить дату и время</translation>
+    </message>
+    <message>
+        <source>24-hour</source>
+        <translation>24-часовой</translation>
+    </message>
+    <message>
+        <source>Month</source>
+        <translation>Месяц</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>Время:</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>Подтвердить</translation>
+    </message>
+    <message>
+        <source>Day</source>
+        <translation>День</translation>
+    </message>
+    <message>
+        <source>Time Format:</source>
+        <translation>Формат времени:</translation>
+    </message>
+    <message>
+        <source>Date:</source>
+        <translation>Дата:</translation>
+    </message>
+    <message>
+        <source>Year</source>
+        <translation>Год</translation>
     </message>
 </context>
 </TS>

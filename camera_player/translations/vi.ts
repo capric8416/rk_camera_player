@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
 <TS version="2.1" language="vi">
 <context>
@@ -168,6 +168,54 @@
     <message>
         <source>Confirm</source>
         <translation>Xác nhận</translation>
+    </message>
+</context>
+
+<context>
+    <name>ChangeDateTimePage</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Hủy</translation>
+    </message>
+    <message>
+        <source>12-hour</source>
+        <translation>12 giờ</translation>
+    </message>
+    <message>
+        <source>Change Date&amp;Time</source>
+        <translation>Đổi Ngày và Giờ</translation>
+    </message>
+    <message>
+        <source>24-hour</source>
+        <translation>24 giờ</translation>
+    </message>
+    <message>
+        <source>Month</source>
+        <translation>Tháng</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>Giờ:</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>Xác nhận</translation>
+    </message>
+    <message>
+        <source>Day</source>
+        <translation>Ngày</translation>
+    </message>
+    <message>
+        <source>Time Format:</source>
+        <translation>Định dạng giờ:</translation>
+    </message>
+    <message>
+        <source>Date:</source>
+        <translation>Ngày:</translation>
+    </message>
+    <message>
+        <source>Year</source>
+        <translation>Năm</translation>
     </message>
 </context>
 </TS>

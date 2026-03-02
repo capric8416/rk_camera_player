@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
 <TS version="2.1" language="pl">
 <context>
@@ -168,6 +168,54 @@
     <message>
         <source>Confirm</source>
         <translation>Potwierdź</translation>
+    </message>
+</context>
+
+<context>
+    <name>ChangeDateTimePage</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Anuluj</translation>
+    </message>
+    <message>
+        <source>12-hour</source>
+        <translation>12-godzinny</translation>
+    </message>
+    <message>
+        <source>Change Date&amp;Time</source>
+        <translation>Zmień datę i czas</translation>
+    </message>
+    <message>
+        <source>24-hour</source>
+        <translation>24-godzinny</translation>
+    </message>
+    <message>
+        <source>Month</source>
+        <translation>Miesiąc</translation>
+    </message>
+    <message>
+        <source>Time:</source>
+        <translation>Czas:</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>Potwierdź</translation>
+    </message>
+    <message>
+        <source>Day</source>
+        <translation>Dzień</translation>
+    </message>
+    <message>
+        <source>Time Format:</source>
+        <translation>Format czasu:</translation>
+    </message>
+    <message>
+        <source>Date:</source>
+        <translation>Data:</translation>
+    </message>
+    <message>
+        <source>Year</source>
+        <translation>Rok</translation>
     </message>
 </context>
 </TS>
