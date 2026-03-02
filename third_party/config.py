@@ -61,7 +61,7 @@ def run_cmd(cmd, cwd=None, env=None):
         sys.exit(result.returncode)
     return result
 
-def fix_pc_prefix(install_dir):
+def fix_pc_prefix(install_dir, sub_include_dir=""):
     """Fix pkg-config files to use relative paths for portability."""
     pc_dir = install_dir / "lib" / "pkgconfig"
     if not pc_dir.exists():
@@ -82,7 +82,10 @@ def fix_pc_prefix(install_dir):
                 elif line.startswith("libdir="):
                     new_lines.append("libdir=${pcfiledir}/..\n")
                 elif line.startswith("includedir="):
-                    new_lines.append("includedir=${prefix}/include\n")
+                    if sub_include_dir:
+                        new_lines.append(f"includedir=${{prefix}}/include/{sub_include_dir}\n")
+                    else:
+                        new_lines.append("includedir=${prefix}/include\n")
                 else:
                     new_lines.append(line)
             

@@ -48,7 +48,7 @@ run_windows = [
 alias = "bd"
 description = "build dependencies"
 usage = """
-arg "[lib]" help="library to build" { choices "mpp" "rga" "ffmpeg" "spdlog" "all"; }
+arg "[lib]" help="library to build" { choices "mpp" "rga" "ffmpeg" "ffmpeg_4_1" "libusb" "spdlog" "x264_0_164_3095" "all"; }
 flag "-R --rebuild" help="clean build (delete temp directory)"
 flag "-D --deploy" help="deploy results to unified temp/install directory"
 """
@@ -67,10 +67,11 @@ run = "python tidy.py"
 [tasks.build]
 description = "build code"
 usage = """
+arg "[project]" help="project to build" { choices "camera_player" "ipcamera"; }
 arg "[action]" help="build action" { choices "configure" "build" "rebuild" "clean" "translate" "all"; }
 flag "-r --release" help="release mode"
 """
-run = "python build.py {{ usage.action | default(value='') }} {% if usage.release %}--release{% endif %}"
+run = "python build.py {% if usage.project %}--project {{ usage.project }}{% endif %} {{ usage.action | default(value='') }} {% if usage.release %}--release{% endif %}"
 
 [tasks.clean]
 alias = "clean"

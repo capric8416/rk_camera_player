@@ -19,7 +19,9 @@ import shutil
 import argparse
 from pathlib import Path
 
-SRC_DIR = "camera_player"
+# Project configuration
+DEFAULT_PROJECT = "camera_player"
+AVAILABLE_PROJECTS = ["camera_player", "ipcamera"]
 CROSS_DIR = "cross_toolchains"
 CROSS_TARGET = os.environ["CROSS_TARGET"]
 THIRD_PARTY_DIR = "third_party"
@@ -69,7 +71,7 @@ def clean(script_dir):
         print("Build directory does not exist, no clean needed.")
         return True
 
-def configure(script_dir, cross_dir, force=False, release=True):
+def configure(script_dir, cross_dir, project_name, force=False, release=True):
     """Configures Meson build."""
     build_dir = script_dir / BUILD_DIR
     cross_file = cross_dir / MESON_CROSS_FILE
@@ -83,11 +85,11 @@ def configure(script_dir, cross_dir, force=False, release=True):
             return True
     
     buildtype = "release" if release else "debug"
-    print(f"Configuring Meson ({buildtype})...")
+    print(f"Configuring Meson ({buildtype}) for {project_name}...")
     cmd = [
         "meson", "setup",
         str(build_dir),
-        str(script_dir / SRC_DIR),
+        str(script_dir / project_name),
         "--cross-file", str(cross_file),
         "--buildtype", buildtype,
     ]
@@ -95,7 +97,7 @@ def configure(script_dir, cross_dir, force=False, release=True):
     result = subprocess.run(cmd)
     return result.returncode == 0
 
-def build(script_dir, release=False):
+def build(script_dir, project_name, release=False):
     """Compiles the project."""
     build_dir = script_dir / BUILD_DIR
     
@@ -112,7 +114,7 @@ def build(script_dir, release=False):
         
     if release:
         print("Release build: performing strip...")
-        binary_path = build_dir / "camera_player"
+        binary_path = build_dir / project_name
         if binary_path.exists():
             # zig-strip requires outputting to a new file, cannot strip in-place
             # Strategy: rename -> strip -> delete renamed
@@ -142,9 +144,9 @@ def build(script_dir, release=False):
             
     return True
 
-def translate(script_dir):
+def translate(script_dir, project_name):
     """Compiles translation files (.ts -> .qm)."""
-    translations_dir = script_dir / SRC_DIR / "translations"
+    translations_dir = script_dir / project_name / "translations"
     
     if not translations_dir.exists():
         print("Error: translations directory does not exist.")
@@ -188,6 +190,12 @@ Examples:
 """
     )
     parser.add_argument(
+        "--project", "-p",
+        choices=AVAILABLE_PROJECTS,
+        default=DEFAULT_PROJECT,
+        help=f"Project to build (default: {DEFAULT_PROJECT})"
+    )
+    parser.add_argument(
         "action",
         nargs="?",
         default="all",
@@ -204,9 +212,10 @@ Examples:
     
     # default to debug, unless release is specified
     release_build = args.release
+    project_name = args.project
     
     print("=" * 50)
-    print("Camera Player Cross-compilation")
+    print(f"Cross-compilation: {project_name}")
     print("=" * 50)
     
     # Set environment variables
@@ -221,31 +230,31 @@ Examples:
         if not clean(script_dir):
             return 1
     elif args.action == "configure":
-        if not configure(script_dir, cross_dir, force=True, release=release_build):
+        if not configure(script_dir, cross_dir, project_name, force=True, release=release_build):
             print("Configuration failed!")
             return 1
     elif args.action == "build":
-        if not build(script_dir, release=release_build):
+        if not build(script_dir, project_name, release=release_build):
             print("Compilation failed!")
             return 1
     elif args.action == "rebuild":
         if not clean(script_dir):
             return 1
-        if not configure(script_dir, cross_dir, force=True, release=release_build):
+        if not configure(script_dir, cross_dir, project_name, force=True, release=release_build):
             print("Configuration failed!")
             return 1
-        if not build(script_dir, release=release_build):
+        if not build(script_dir, project_name, release=release_build):
             print("Compilation failed!")
             return 1
     elif args.action == "translate":
-        if not translate(script_dir):
+        if not translate(script_dir, project_name):
             print("Translation compilation failed!")
             return 1
     else:  # all (default)
-        if not configure(script_dir, cross_dir, force=False, release=release_build):
+        if not configure(script_dir, cross_dir, project_name, force=False, release=release_build):
             print("Configuration failed!")
             return 1
-        if not build(script_dir, release=release_build):
+        if not build(script_dir, project_name, release=release_build):
             print("Compilation failed!")
             return 1
     
@@ -253,7 +262,7 @@ Examples:
     print("=" * 50)
     print("Done!")
     if args.action in ["all", "build", "rebuild"]:
-        print(f"Output: {script_dir / BUILD_DIR / 'camera_player'}")
+        print(f"Output: {script_dir / BUILD_DIR / project_name}")
     print("=" * 50)
     
     return 0
