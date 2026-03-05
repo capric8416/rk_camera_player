@@ -5,15 +5,18 @@
  */
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace player {
 
+class SystemInterface;
+
 class CameraCapture
 {
 public:
-    CameraCapture();
+    CameraCapture(SystemInterface *sys = nullptr);
     ~CameraCapture();
 
     // 禁止拷贝
@@ -56,6 +59,8 @@ private:
     };
 
     int m_fd;
+    SystemInterface *m_sys;
+    bool m_own_sys;
     uint32_t m_width;
     uint32_t m_height;
     uint32_t m_fps;

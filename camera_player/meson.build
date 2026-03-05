@@ -69,6 +69,7 @@ gui_sources = files(
 
 # Player 源文件 (Camera Overlay)
 player_sources = files(
+    'src/player/system_interface.cpp',
     'src/player/camera_player.cpp',
     'src/player/file_player.cpp',
     'src/player/camera_capture.cpp',
@@ -152,3 +153,6 @@ executable('camera_player',
     ],
     install: true,
 )
+
+# 单元测试
+subdir('tests')

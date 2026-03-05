@@ -1,5 +1,6 @@
 #include "camera_capture.hpp"
 #include "logger.hpp"
+#include "system_interface.hpp"
 
 #include <cerrno>
 #include <cstring>
@@ -11,17 +12,29 @@
 
 namespace player {
 
-CameraCapture::CameraCapture()
+CameraCapture::CameraCapture(SystemInterface *sys)
     : m_fd(-1)
+    , m_sys(sys)
+    , m_own_sys(false)
     , m_width(0)
     , m_height(0)
     , m_fps(0)
     , m_current_buffer_index(-1)
     , m_streaming(false)
 {
+    if (!m_sys) {
+        m_sys = new LinuxSystem();
+        m_own_sys = true;
+    }
 }
 
-CameraCapture::~CameraCapture() { close(); }
+CameraCapture::~CameraCapture()
+{
+    close();
+    if (m_own_sys) {
+        delete m_sys;
+    }
+}
 
 bool CameraCapture::open(
     const std::string &device,
@@ -30,7 +43,7 @@ bool CameraCapture::open(
     uint32_t fps
 )
 {
-    m_fd = ::open(device.c_str(), O_RDWR);
+    m_fd = m_sys->open(device.c_str(), O_RDWR);
     if (m_fd < 0) {
         LOG_ERROR("无法打开摄像头 {}: {}", device, strerror(errno));
         return false;
@@ -38,7 +51,7 @@ bool CameraCapture::open(
 
     // 查询能力
     struct v4l2_capability cap = {};
-    if (ioctl(m_fd, VIDIOC_QUERYCAP, &cap) < 0) {
+    if (m_sys->ioctl(m_fd, VIDIOC_QUERYCAP, &cap) < 0) {
         LOG_ERROR("VIDIOC_QUERYCAP 失败");
         close();
         return false;
@@ -70,7 +83,7 @@ bool CameraCapture::open(
     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
     fmt.fmt.pix.field = V4L2_FIELD_NONE;
 
-    if (ioctl(m_fd, VIDIOC_S_FMT, &fmt) < 0) {
+    if (m_sys->ioctl(m_fd, VIDIOC_S_FMT, &fmt) < 0) {
         LOG_ERROR("VIDIOC_S_FMT 失败");
         close();
         return false;
@@ -86,7 +99,7 @@ bool CameraCapture::open(
     parm.parm.capture.timeperframe.numerator = 1;
     parm.parm.capture.timeperframe.denominator = fps;
 
-    if (ioctl(m_fd, VIDIOC_S_PARM, &parm) < 0) {
+    if (m_sys->ioctl(m_fd, VIDIOC_S_PARM, &parm) < 0) {
         LOG_WARN("设置帧率失败");
     }
 
@@ -100,7 +113,7 @@ bool CameraCapture::open(
     req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory = V4L2_MEMORY_MMAP;
 
-    if (ioctl(m_fd, VIDIOC_REQBUFS, &req) < 0) {
+    if (m_sys->ioctl(m_fd, VIDIOC_REQBUFS, &req) < 0) {
         LOG_ERROR("VIDIOC_REQBUFS 失败");
         close();
         return false;
@@ -114,14 +127,14 @@ bool CameraCapture::open(
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = i;
 
-        if (ioctl(m_fd, VIDIOC_QUERYBUF, &buf) < 0) {
+        if (m_sys->ioctl(m_fd, VIDIOC_QUERYBUF, &buf) < 0) {
             LOG_ERROR("VIDIOC_QUERYBUF 失败");
             close();
             return false;
         }
 
         m_buffers[i].size = buf.length;
-        m_buffers[i].addr = mmap(
+        m_buffers[i].addr = m_sys->mmap(
             nullptr,
             buf.length,
             PROT_READ | PROT_WRITE,
@@ -146,13 +159,13 @@ void CameraCapture::close()
 
     for (auto &buf : m_buffers) {
         if (buf.addr && buf.addr != MAP_FAILED) {
-            munmap(buf.addr, buf.size);
+            m_sys->munmap(buf.addr, buf.size);
         }
     }
     m_buffers.clear();
 
     if (m_fd >= 0) {
-        ::close(m_fd);
+        m_sys->close(m_fd);
         m_fd = -1;
     }
 }
@@ -170,7 +183,7 @@ bool CameraCapture::start_streaming()
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = static_cast<uint32_t>(i);
 
-        if (ioctl(m_fd, VIDIOC_QBUF, &buf) < 0) {
+        if (m_sys->ioctl(m_fd, VIDIOC_QBUF, &buf) < 0) {
             LOG_ERROR("VIDIOC_QBUF 失败");
             return false;
         }
@@ -178,7 +191,7 @@ bool CameraCapture::start_streaming()
 
     // 开始流
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (ioctl(m_fd, VIDIOC_STREAMON, &type) < 0) {
+    if (m_sys->ioctl(m_fd, VIDIOC_STREAMON, &type) < 0) {
         LOG_ERROR("VIDIOC_STREAMON 失败");
         return false;
     }
@@ -194,7 +207,7 @@ void CameraCapture::stop_streaming()
     }
 
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    ioctl(m_fd, VIDIOC_STREAMOFF, &type);
+    m_sys->ioctl(m_fd, VIDIOC_STREAMOFF, &type);
     m_streaming = false;
 }
 
@@ -208,7 +221,7 @@ bool CameraCapture::capture_frame(uint8_t **data, size_t *size)
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
 
-    if (ioctl(m_fd, VIDIOC_DQBUF, &buf) < 0) {
+    if (m_sys->ioctl(m_fd, VIDIOC_DQBUF, &buf) < 0) {
         LOG_ERROR("VIDIOC_DQBUF 失败: {}", strerror(errno));
         return false;
     }
@@ -231,7 +244,7 @@ void CameraCapture::release_frame()
     buf.memory = V4L2_MEMORY_MMAP;
     buf.index = static_cast<uint32_t>(m_current_buffer_index);
 
-    ioctl(m_fd, VIDIOC_QBUF, &buf);
+    m_sys->ioctl(m_fd, VIDIOC_QBUF, &buf);
     m_current_buffer_index = -1;
 }
 
