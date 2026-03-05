@@ -74,9 +74,11 @@ def fix_pc_prefix(install_dir, sub_include_dir=""):
                 lines = f.readlines()
             
             new_lines = []
+            has_prefix = False
             for line in lines:
                 if line.startswith("prefix="):
                     new_lines.append("prefix=${pcfiledir}/../../..\n")
+                    has_prefix = True
                 elif line.startswith("exec_prefix="):
                     new_lines.append("exec_prefix=${prefix}\n")
                 elif line.startswith("libdir="):
@@ -88,6 +90,9 @@ def fix_pc_prefix(install_dir, sub_include_dir=""):
                         new_lines.append("includedir=${prefix}/include\n")
                 else:
                     new_lines.append(line)
+            
+            if not has_prefix:
+                new_lines.insert(0, "prefix=${pcfiledir}/../../..\n")
             
             with open(pc_file, "w", encoding="utf-8") as f:
                 f.writelines(new_lines)

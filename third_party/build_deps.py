@@ -15,6 +15,7 @@ import build_spdlog
 import build_ffmpeg_4_1
 import build_x264_0_164_3095
 import build_libusb
+import build_google_test
 
 def remove_readonly(func, path, _):
     """Clear the read-only bit and retry deletion (for Windows .git folders)."""
@@ -26,7 +27,7 @@ def main():
     parser.add_argument(
         "lib",
         nargs="?",
-        choices=["mpp", "rga", "ffmpeg", "spdlog", "ffmpeg_4_1", "libusb", "x264_0_164_3095", "all"],
+        choices=["mpp", "rga", "ffmpeg", "spdlog", "ffmpeg_4_1", "google_test", "libusb", "x264_0_164_3095", "all"],
         default="all",
         help="Library to build (default: all)"
     )
@@ -56,6 +57,7 @@ def main():
         "ffmpeg": build_ffmpeg.main,
         "spdlog": build_spdlog.main,
         "ffmpeg_4_1": build_ffmpeg_4_1.main,
+        "google_test": build_google_test.main,
         "x264_0_164_3095": build_x264_0_164_3095.main,
     }
 

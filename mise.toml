@@ -48,7 +48,7 @@ run_windows = [
 alias = "bd"
 description = "build dependencies"
 usage = """
-arg "[lib]" help="library to build" { choices "mpp" "rga" "ffmpeg" "ffmpeg_4_1" "libusb" "spdlog" "x264_0_164_3095" "all"; }
+arg "[lib]" help="library to build" { choices "mpp" "rga" "ffmpeg" "ffmpeg_4_1" "google_test" "libusb" "spdlog" "x264_0_164_3095" "all"; }
 flag "-R --rebuild" help="clean build (delete temp directory)"
 flag "-D --deploy" help="deploy results to unified temp/install directory"
 """
