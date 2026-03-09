@@ -60,6 +60,8 @@ static MppCodingType to_mpp_codec(EncoderCodec codec)
         return MPP_VIDEO_CodingAVC;
     case EncoderCodec::HEVC:
         return MPP_VIDEO_CodingHEVC;
+    case EncoderCodec::MJPEG:
+        return MPP_VIDEO_CodingMJPEG;
     default:
         return MPP_VIDEO_CodingAVC;
     }
@@ -85,6 +87,12 @@ bool MppEncoder::init(const EncoderConfig &config)
 {
     if (m_initialized) {
         LOG_WARN("编码器已初始化");
+        return false;
+    }
+
+    if (config.width <= 0 || config.height <= 0 || config.width > 8192 ||
+        config.height > 8192) {
+        LOG_ERROR("无效的图像尺寸: {}x{}", config.width, config.height);
         return false;
     }
 
@@ -273,10 +281,15 @@ bool MppEncoder::setup_encoder_config()
         mpp_enc_cfg_set_s32(impl->cfg, "h264:qp_min", 8);
         mpp_enc_cfg_set_s32(impl->cfg, "h264:qp_max_i", 48);
         mpp_enc_cfg_set_s32(impl->cfg, "h264:qp_min_i", 8);
-    } else {
+    } else if (m_config.codec == EncoderCodec::HEVC) {
         mpp_enc_cfg_set_s32(impl->cfg, "h265:qp_init", 26);
         mpp_enc_cfg_set_s32(impl->cfg, "h265:qp_max", 51);
         mpp_enc_cfg_set_s32(impl->cfg, "h265:qp_min", 10);
+    } else if (m_config.codec == EncoderCodec::MJPEG) {
+        // JPEG 质量 (1-99)
+        mpp_enc_cfg_set_s32(impl->cfg, "jpeg:q_factor", 80);
+        mpp_enc_cfg_set_s32(impl->cfg, "jpeg:qf_max", 99);
+        mpp_enc_cfg_set_s32(impl->cfg, "jpeg:qf_min", 10);
     }
 
     // 应用配置
@@ -372,7 +385,10 @@ bool MppEncoder::start()
 
     // 打开输出
     if (!m_config.output_path.empty()) {
-        if (m_config.use_mp4_container) {
+        // MJPEG 通常不使用 MP4 容器，除非是 MJPEG-in-MP4，这里默认 JPEG
+        // 直接输出
+        if (m_config.use_mp4_container &&
+            m_config.codec != EncoderCodec::MJPEG) {
             // 使用 FFmpeg muxer 封装为 MP4
             m_muxer = std::make_unique<FFmpegMuxer>();
 
@@ -412,6 +428,15 @@ bool MppEncoder::start()
                 m_output_file.reset();
                 return false;
             }
+
+            // 如果是 H264/H265 原始流，需要先写入序列头部 (SPS/PPS/VPS)
+            if (!m_header_data.empty()) {
+                m_output_file->write(
+                    reinterpret_cast<const char *>(m_header_data.data()),
+                    m_header_data.size()
+                );
+                LOG_INFO("写入原始流序列头: {} 字节", m_header_data.size());
+            }
         }
     }
 
@@ -432,6 +457,31 @@ void MppEncoder::stop()
 
     m_encoding = false;
 
+    // 停止前排干编码器中的剩余包 (Drain)
+    if (m_initialized && m_impl) {
+        auto *impl = static_cast<MppEncoderImpl *>(m_impl);
+        MppPacket packet = nullptr;
+        // 使用非阻塞或短超时获取最后几帧
+        while (impl->mpi->encode_get_packet(impl->ctx, &packet) == MPP_OK &&
+               packet) {
+            void *ptr = mpp_packet_get_pos(packet);
+            size_t len = mpp_packet_get_length(packet);
+            if (ptr && len > 0) {
+                RK_U32 is_intra = 0;
+                MppMeta meta = mpp_packet_get_meta(packet);
+                if (meta) {
+                    mpp_meta_get_s32(
+                        meta,
+                        KEY_OUTPUT_INTRA,
+                        reinterpret_cast<RK_S32 *>(&is_intra)
+                    );
+                }
+                write_packet_to_file(ptr, len, is_intra != 0, m_frame_count++);
+            }
+            mpp_packet_deinit(&packet);
+        }
+    }
+
     if (m_muxer) {
         m_muxer->close();
         m_muxer.reset();
@@ -451,7 +501,28 @@ bool MppEncoder::encode_frame(const InputFrame &frame)
         return false;
     }
 
+    if (frame.fd < 0) {
+        if (!frame.data || frame.size == 0) {
+            LOG_ERROR(
+                "MppEncoder::encode_frame: frame.data 是空指针或 size 为 0 (fd "
+                "= -1)"
+            );
+            return false;
+        }
+    }
+
     auto *impl = static_cast<MppEncoderImpl *>(m_impl);
+
+    // 检查 frame.size 是否超过了分配的 buffer 大小
+    if (frame.fd < 0 && frame.size > impl->frame_size) {
+        LOG_ERROR(
+            "MppEncoder::encode_frame: 数据大小 ({}) 超过了缓冲区最大限制 ({})",
+            frame.size,
+            impl->frame_size
+        );
+        return false;
+    }
+
     MPP_RET ret;
 
     // 设置输入帧数据
@@ -485,6 +556,9 @@ bool MppEncoder::encode_frame(const InputFrame &frame)
         impl->frame,
         frame.ver_stride ? frame.ver_stride : impl->ver_stride
     );
+
+    // 设置时间戳，防止率控失效
+    mpp_frame_set_pts(impl->frame, m_frame_count);
 
     // 使用同步编码接口
     MppPacket packet = nullptr;

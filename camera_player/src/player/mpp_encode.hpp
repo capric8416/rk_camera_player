@@ -1,10 +1,10 @@
 #pragma once
 
 /**
- * MppEncoder - MPP H264/HEVC 编码器
+ * MppEncoder - MPP H264/HEVC/MJPEG 编码器
  *
  * 功能:
- * - 支持 H264/HEVC 编码
+ * - 支持 H264/HEVC/MJPEG 编码
  * - 可配置 GOP, bitrate, fps, 码率控制方式
  * - 输出到文件
  */
@@ -24,7 +24,7 @@ namespace player {
 /**
  * 编码格式
  */
-enum class EncoderCodec { H264, HEVC };
+enum class EncoderCodec { H264, HEVC, MJPEG };
 
 /**
  * 像素格式
