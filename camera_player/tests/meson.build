@@ -8,6 +8,7 @@ test_sources = files(
     'player/test_camera_capture.cpp',
     'player/test_mpp_decode.cpp',
     'player/test_mpp_encode.cpp',
+    'player/test_ffmpeg_muxer.cpp',
 )
 
 # 源码文件 (从父目录引用并过滤掉 main.cpp 相关的)

@@ -14,11 +14,11 @@
 #include <string>
 #include <vector>
 
-// Forward declarations for FFmpeg types
 struct AVFormatContext;
 struct AVStream;
 struct AVCodecParameters;
 struct AVPacket;
+struct AVBSFContext;
 
 namespace player {
 
@@ -92,6 +92,7 @@ private:
     AVFormatContext *m_fmt_ctx;
     AVStream *m_video_stream;
     AVPacket *m_packet;
+    AVBSFContext *m_bsf_ctx;
 
     MuxerConfig m_config;
     bool m_opened;
