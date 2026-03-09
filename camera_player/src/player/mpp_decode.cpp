@@ -74,6 +74,16 @@ bool MppDecoder::init(
     MppCodingType coding_type
 )
 {
+    if (m_initialized) {
+        LOG_WARN("解码器已初始化，请先调用 destroy()");
+        return false;
+    }
+
+    if (width <= 0 || height <= 0 || width > 8192 || height > 8192) {
+        LOG_ERROR("无效的图像尺寸: {}x{}", width, height);
+        return false;
+    }
+
     m_width = width;
     m_height = height;
     m_coding_type = coding_type;
@@ -84,9 +94,16 @@ bool MppDecoder::init(
     memset(impl, 0, sizeof(MppDecoderImpl));
 
     // H.264/H.265 使用简单 API，MJPEG 使用 task mode
-    impl->use_simple_api =
-        (coding_type == MPP_VIDEO_CodingAVC ||
-         coding_type == MPP_VIDEO_CodingHEVC);
+    if (coding_type == MPP_VIDEO_CodingMJPEG) {
+        impl->use_simple_api = false;
+    } else if (coding_type == MPP_VIDEO_CodingAVC ||
+               coding_type == MPP_VIDEO_CodingHEVC) {
+        impl->use_simple_api = true;
+    } else {
+        LOG_ERROR("不支持的编码类型: {}", static_cast<int>(coding_type));
+        delete impl;
+        return false;
+    }
 
     MPP_RET ret;
 
@@ -293,6 +310,16 @@ static bool decode_task_mode(
     DecodedFrame &frame
 )
 {
+    if (!data || size == 0) {
+        LOG_WARN("Task mode 不支持空数据轮询，要求输入数据");
+        return false;
+    }
+
+    if (size > impl->packet_size) {
+        LOG_WARN("MJPEG 数据过大: {} > {}", size, impl->packet_size);
+        return false;
+    }
+
     // 复制数据到 packet buffer
     memcpy(mpp_packet_get_data(impl->packet), data, size);
     mpp_packet_set_length(impl->packet, size);
@@ -352,6 +379,16 @@ static bool decode_task_mode(
         return false;
     }
 
+    // 检查是否有错误或丢弃帧
+    if (mpp_frame_get_errinfo(mpp_frame) || mpp_frame_get_discard(mpp_frame)) {
+        LOG_WARN(
+            "frame error/discard: err={}, discard={}",
+            mpp_frame_get_errinfo(mpp_frame),
+            mpp_frame_get_discard(mpp_frame)
+        );
+        return false;
+    }
+
     // 获取帧缓冲区
     MppBuffer buffer = mpp_frame_get_buffer(mpp_frame);
     if (!buffer) {
@@ -381,31 +418,39 @@ static bool decode_simple_mode(
     uint32_t &out_ver_stride
 )
 {
-    if (size > impl->simple_packet_buf_size) {
-        LOG_WARN("NAL 数据过大: {} > {}", size, impl->simple_packet_buf_size);
-        return false;
-    }
+    MPP_RET ret = MPP_OK;
 
-    // 复制数据
-    memcpy(impl->simple_packet_buf, data, size);
+    // 如果传入了数据，则推入解码器；如果 data==nullptr && size==0，则仅轮询输出
+    if (data && size > 0) {
+        if (size > impl->simple_packet_buf_size) {
+            LOG_WARN(
+                "NAL 数据过大: {} > {}",
+                size,
+                impl->simple_packet_buf_size
+            );
+            return false;
+        }
 
-    // 创建 packet
-    MppPacket packet = nullptr;
-    MPP_RET ret = mpp_packet_init(&packet, impl->simple_packet_buf, size);
-    if (ret != MPP_OK) {
-        LOG_ERROR("mpp_packet_init 失败");
-        return false;
-    }
-    mpp_packet_set_pts(packet, 0);
+        // 复制数据
+        memcpy(impl->simple_packet_buf, data, size);
 
-    // 发送 packet 到解码器
-    ret = impl->mpi->decode_put_packet(impl->ctx, packet);
-    mpp_packet_deinit(&packet);
+        // 创建 packet
+        MppPacket packet = nullptr;
+        ret = mpp_packet_init(&packet, impl->simple_packet_buf, size);
+        if (ret != MPP_OK) {
+            LOG_ERROR("mpp_packet_init 失败");
+            return false;
+        }
+        mpp_packet_set_pts(packet, 0);
 
-    if (ret != MPP_OK) {
-        LOG_WARN("decode_put_packet failed: {}", static_cast<int>(ret));
-        // 即使 put_packet 失败，也尝试
-        // get_frame，因为可能需要处理帧信息变化或错误
+        // 发送 packet 到解码器
+        ret = impl->mpi->decode_put_packet(impl->ctx, packet);
+        mpp_packet_deinit(&packet);
+
+        if (ret != MPP_OK) {
+            LOG_WARN("decode_put_packet failed: {}", static_cast<int>(ret));
+            // 即使 put_packet 失败，也继续尝试 get_frame
+        }
     }
 
     // 尝试获取解码后的帧

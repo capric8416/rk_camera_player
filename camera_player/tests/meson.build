@@ -6,6 +6,7 @@ gmock_dep = dependency('gmock', required: true, static: true)
 test_sources = files(
     'test_main.cpp',
     'player/test_camera_capture.cpp',
+    'player/test_mpp_decode.cpp',
 )
 
 # 源码文件 (从父目录引用并过滤掉 main.cpp 相关的)
@@ -13,6 +14,7 @@ test_sources = files(
 test_player_sources = files(
     '../src/player/camera_capture.cpp',
     '../src/player/system_interface.cpp',
+    '../src/player/mpp_decode.cpp',
 )
 
 # 测试包含目录
@@ -31,11 +33,11 @@ test_exe = executable('camera_player_tests',
         #qt5_widgets,
         #libdrm_dep,
         #librga_dep,
-        #mpp_dep,
+        mpp_dep,
         #avcodec_dep,
         #avformat_dep,
         #avutil_dep,
-        #spdlog_dep,
+        spdlog_dep,
     ],
 )
 
