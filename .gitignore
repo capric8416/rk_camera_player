@@ -16,4 +16,5 @@ cross_toolchains/arm-linux-gnueabihf.2.17
 *.h264
 *.h265
 *.mp4
-
+*.rgb
+*.rgba
