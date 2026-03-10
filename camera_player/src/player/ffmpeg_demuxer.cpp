@@ -181,8 +181,10 @@ void FFmpegDemuxer::close()
 
 bool FFmpegDemuxer::seek(double seconds)
 {
-    if (!m_fmt_ctx || m_video_stream_index < 0)
+    if (!m_fmt_ctx || m_video_stream_index < 0 || !m_bsf_ctx) {
+        LOG_ERROR("Demuxer not opened or initialized");
         return false;
+    }
 
     int64_t timestamp =
         static_cast<int64_t>(seconds / av_q2d(m_video_stream->time_base));
@@ -207,8 +209,10 @@ bool FFmpegDemuxer::seek(double seconds)
 
 bool FFmpegDemuxer::read_packet(std::vector<uint8_t> &data, int64_t &pts)
 {
-    if (!m_fmt_ctx || !m_bsf_ctx || !m_packet)
+    if (!m_fmt_ctx || !m_video_stream || !m_bsf_ctx || !m_packet) {
+        LOG_ERROR("Demuxer not opened or initialized");
         return false;
+    }
 
     data.clear();
     int ret;
