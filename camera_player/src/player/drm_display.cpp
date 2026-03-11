@@ -1,5 +1,7 @@
 #include "drm_display.hpp"
+#include "drm_interface.hpp"
 #include "logger.hpp"
+#include "system_interface.hpp"
 
 #include <cstring>
 #include <fcntl.h>
@@ -13,8 +15,12 @@
 
 namespace player {
 
-DrmDisplay::DrmDisplay()
-    : m_fd(-1)
+DrmDisplay::DrmDisplay(SystemInterface *sys, DrmInterface *drm)
+    : m_sys(sys)
+    , m_drm(drm)
+    , m_own_sys(false)
+    , m_own_drm(false)
+    , m_fd(-1)
     , m_crtc_id(0)
     , m_crtc_index(0)
     , m_plane_id(0)
@@ -25,20 +31,35 @@ DrmDisplay::DrmDisplay()
     , m_front_buf(0)
     , m_initialized(false)
 {
+    if (!m_sys) {
+        m_sys = new LinuxSystem();
+        m_own_sys = true;
+    }
+    if (!m_drm) {
+        m_drm = new LibDrm();
+        m_own_drm = true;
+    }
     memset(m_buffers, 0, sizeof(m_buffers));
 }
 
-DrmDisplay::~DrmDisplay() { close(); }
+DrmDisplay::~DrmDisplay()
+{
+    close();
+    if (m_own_sys)
+        delete m_sys;
+    if (m_own_drm)
+        delete m_drm;
+}
 
 bool DrmDisplay::open(const std::string &device)
 {
-    m_fd = ::open(device.c_str(), O_RDWR | O_CLOEXEC);
+    m_fd = m_sys->open(device.c_str(), O_RDWR | O_CLOEXEC);
     if (m_fd < 0) {
         LOG_ERROR("无法打开 DRM: {}", device);
         return false;
     }
 
-    drmSetClientCap(m_fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1);
+    m_drm->set_client_cap(m_fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1);
     return true;
 }
 
@@ -50,14 +71,14 @@ bool DrmDisplay::init(
 )
 {
     // 查找活动 CRTC
-    drmModeRes *res = drmModeGetResources(m_fd);
+    drmModeRes *res = m_drm->get_resources(m_fd);
     if (!res) {
         LOG_ERROR("drmModeGetResources 失败");
         return false;
     }
 
     for (int i = 0; i < res->count_crtcs; ++i) {
-        drmModeCrtc *crtc = drmModeGetCrtc(m_fd, res->crtcs[i]);
+        drmModeCrtc *crtc = m_drm->get_crtc(m_fd, res->crtcs[i]);
         if (crtc && crtc->mode_valid) {
             m_crtc_id = crtc->crtc_id;
             m_crtc_index = i;
@@ -69,13 +90,13 @@ bool DrmDisplay::init(
                 m_display_width,
                 m_display_height
             );
-            drmModeFreeCrtc(crtc);
+            m_drm->free_crtc(crtc);
             break;
         }
         if (crtc)
-            drmModeFreeCrtc(crtc);
+            m_drm->free_crtc(crtc);
     }
-    drmModeFreeResources(res);
+    m_drm->free_resources(res);
 
     if (!m_crtc_id) {
         LOG_ERROR("无活动 CRTC");
@@ -83,7 +104,7 @@ bool DrmDisplay::init(
     }
 
     // 查找 overlay plane
-    drmModePlaneRes *pres = drmModeGetPlaneResources(m_fd);
+    drmModePlaneRes *pres = m_drm->get_plane_resources(m_fd);
     if (!pres) {
         LOG_ERROR("drmModeGetPlaneResources 失败");
         return false;
@@ -94,19 +115,19 @@ bool DrmDisplay::init(
         LOG_INFO("使用指定 plane: {}", m_plane_id);
     } else {
         for (uint32_t i = 0; i < pres->count_planes; ++i) {
-            drmModePlane *p = drmModeGetPlane(m_fd, pres->planes[i]);
+            drmModePlane *p = m_drm->get_plane(m_fd, pres->planes[i]);
             if (p && (p->possible_crtcs & (1 << m_crtc_index)) &&
                 p->crtc_id == 0) {
                 m_plane_id = p->plane_id;
                 LOG_INFO("Overlay plane: {}", m_plane_id);
-                drmModeFreePlane(p);
+                m_drm->free_plane(p);
                 break;
             }
             if (p)
-                drmModeFreePlane(p);
+                m_drm->free_plane(p);
         }
     }
-    drmModeFreePlaneResources(pres);
+    m_drm->free_plane_resources(pres);
 
     if (!m_plane_id) {
         LOG_ERROR("无空闲 overlay plane");
@@ -137,7 +158,7 @@ bool DrmDisplay::init(
     set_property(m_plane_id, DRM_MODE_OBJECT_PLANE, "alpha", 65535);
 
     // 设置其他 plane 的 zpos 更高 (让 Weston 在前面)
-    drmModePlaneRes *pres2 = drmModeGetPlaneResources(m_fd);
+    drmModePlaneRes *pres2 = m_drm->get_plane_resources(m_fd);
     if (pres2) {
         for (uint32_t i = 0; i < pres2->count_planes; ++i) {
             uint32_t other_plane = pres2->planes[i];
@@ -156,11 +177,11 @@ bool DrmDisplay::init(
                 }
             }
         }
-        drmModeFreePlaneResources(pres2);
+        m_drm->free_plane_resources(pres2);
     }
 
     // 初始帧
-    int ret = drmModeSetPlane(
+    int ret = m_drm->set_plane(
         m_fd,
         m_plane_id,
         m_crtc_id,
@@ -188,7 +209,7 @@ bool DrmDisplay::init(
 void DrmDisplay::close()
 {
     if (m_plane_id && m_fd >= 0) {
-        drmModeSetPlane(m_fd, m_plane_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        m_drm->set_plane(m_fd, m_plane_id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     for (int i = 0; i < 2; ++i) {
@@ -198,65 +219,24 @@ void DrmDisplay::close()
     // 清理 NV12 缓存
     for (auto &pair : m_nv12_cache) {
         if (pair.second.fb_id) {
-            drmModeRmFB(m_fd, pair.second.fb_id);
+            m_drm->rm_fb(m_fd, pair.second.fb_id);
         }
         if (pair.second.gem_handle) {
             struct drm_gem_close close_req = {};
             close_req.handle = pair.second.gem_handle;
-            ioctl(m_fd, DRM_IOCTL_GEM_CLOSE, &close_req);
+            m_sys->ioctl(m_fd, DRM_IOCTL_GEM_CLOSE, &close_req);
         }
     }
     m_nv12_cache.clear();
 
     if (m_fd >= 0) {
-        ::close(m_fd);
+        m_sys->close(m_fd);
         m_fd = -1;
     }
 
     m_initialized = false;
 }
 
-void *DrmDisplay::get_back_buffer(size_t *size)
-{
-    int idx = (m_front_buf + 1) % 2;
-    if (size) {
-        *size = m_buffers[idx].size;
-    }
-    return m_buffers[idx].map;
-}
-
-void DrmDisplay::flip()
-{
-    if (!m_initialized) {
-        return;
-    }
-
-    int idx = (m_front_buf + 1) % 2;
-    Buffer &buf = m_buffers[idx];
-
-    drmVBlank vbl = {};
-    vbl.request.type = DRM_VBLANK_RELATIVE;
-    vbl.request.sequence = 1;
-    drmWaitVBlank(m_fd, &vbl);
-
-    drmModeSetPlane(
-        m_fd,
-        m_plane_id,
-        m_crtc_id,
-        buf.fb_id,
-        0,
-        0,
-        0,
-        m_display_width,
-        m_display_height,
-        0,
-        0,
-        m_video_width << 16,
-        m_video_height << 16
-    );
-
-    m_front_buf = idx;
-}
 
 bool DrmDisplay::create_buffer(
     uint32_t width,
@@ -270,7 +250,7 @@ bool DrmDisplay::create_buffer(
     create.height = height;
     create.bpp = 32;
 
-    if (ioctl(m_fd, DRM_IOCTL_MODE_CREATE_DUMB, &create) < 0) {
+    if (m_sys->ioctl(m_fd, DRM_IOCTL_MODE_CREATE_DUMB, &create) < 0) {
         return false;
     }
 
@@ -281,7 +261,7 @@ bool DrmDisplay::create_buffer(
     uint32_t pitches[4] = {create.pitch, 0, 0, 0};
     uint32_t offsets[4] = {0, 0, 0, 0};
 
-    if (drmModeAddFB2(
+    if (m_drm->add_fb2(
             m_fd,
             width,
             height,
@@ -294,22 +274,22 @@ bool DrmDisplay::create_buffer(
         ) < 0) {
         struct drm_mode_destroy_dumb dreq = {};
         dreq.handle = create.handle;
-        ioctl(m_fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
+        m_sys->ioctl(m_fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
         return false;
     }
 
     struct drm_mode_map_dumb map = {};
     map.handle = create.handle;
 
-    if (ioctl(m_fd, DRM_IOCTL_MODE_MAP_DUMB, &map) < 0) {
-        drmModeRmFB(m_fd, buf.fb_id);
+    if (m_sys->ioctl(m_fd, DRM_IOCTL_MODE_MAP_DUMB, &map) < 0) {
+        m_drm->rm_fb(m_fd, buf.fb_id);
         struct drm_mode_destroy_dumb dreq = {};
         dreq.handle = create.handle;
-        ioctl(m_fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
+        m_sys->ioctl(m_fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
         return false;
     }
 
-    buf.map = mmap(
+    buf.map = m_sys->mmap(
         nullptr,
         create.size,
         PROT_READ | PROT_WRITE,
@@ -327,19 +307,19 @@ bool DrmDisplay::create_buffer(
 void DrmDisplay::destroy_buffer(Buffer &buf)
 {
     if (buf.map) {
-        munmap(buf.map, buf.size);
+        m_sys->munmap(buf.map, buf.size);
         buf.map = nullptr;
     }
 
     if (buf.fb_id) {
-        drmModeRmFB(m_fd, buf.fb_id);
+        m_drm->rm_fb(m_fd, buf.fb_id);
         buf.fb_id = 0;
     }
 
     if (buf.handle) {
         struct drm_mode_destroy_dumb dreq = {};
         dreq.handle = buf.handle;
-        ioctl(m_fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
+        m_sys->ioctl(m_fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
         buf.handle = 0;
     }
 }
@@ -352,30 +332,30 @@ int DrmDisplay::set_property(
 )
 {
     drmModeObjectProperties *props =
-        drmModeObjectGetProperties(m_fd, object_id, object_type);
+        m_drm->get_object_properties(m_fd, object_id, object_type);
     if (!props) {
         return -1;
     }
 
     int ret = -1;
     for (uint32_t i = 0; i < props->count_props; ++i) {
-        drmModePropertyRes *prop = drmModeGetProperty(m_fd, props->props[i]);
+        drmModePropertyRes *prop = m_drm->get_property(m_fd, props->props[i]);
         if (prop && strcmp(prop->name, prop_name) == 0) {
-            ret = drmModeObjectSetProperty(
+            ret = m_drm->set_object_property(
                 m_fd,
                 object_id,
                 object_type,
                 prop->prop_id,
                 value
             );
-            drmModeFreeProperty(prop);
+            m_drm->free_property(prop);
             break;
         }
         if (prop)
-            drmModeFreeProperty(prop);
+            m_drm->free_property(prop);
     }
 
-    drmModeFreeObjectProperties(props);
+    m_drm->free_object_properties(props);
     return ret;
 }
 
@@ -401,7 +381,7 @@ bool DrmDisplay::display_nv12(
     } else {
         // 缓存未命中，创建新的 framebuffer
         uint32_t gem_handle = 0;
-        int ret = drmPrimeFDToHandle(m_fd, fd, &gem_handle);
+        int ret = m_drm->prime_fd_to_handle(m_fd, fd, &gem_handle);
         if (ret < 0) {
             LOG_ERROR("drmPrimeFDToHandle 失败: {}", ret);
             return false;
@@ -412,7 +392,7 @@ bool DrmDisplay::display_nv12(
         uint32_t pitches[4] = {hor_stride, hor_stride, 0, 0};
         uint32_t offsets[4] = {0, hor_stride * ver_stride, 0, 0};
 
-        ret = drmModeAddFB2(
+        ret = m_drm->add_fb2(
             m_fd,
             width,
             height,
@@ -427,7 +407,7 @@ bool DrmDisplay::display_nv12(
             LOG_ERROR("drmModeAddFB2 (NV12) 失败: {}", ret);
             struct drm_gem_close close_req = {};
             close_req.handle = gem_handle;
-            ioctl(m_fd, DRM_IOCTL_GEM_CLOSE, &close_req);
+            m_sys->ioctl(m_fd, DRM_IOCTL_GEM_CLOSE, &close_req);
             return false;
         }
 
@@ -441,10 +421,10 @@ bool DrmDisplay::display_nv12(
     drmVBlank vbl = {};
     vbl.request.type = DRM_VBLANK_RELATIVE;
     vbl.request.sequence = 1;
-    drmWaitVBlank(m_fd, &vbl);
+    m_drm->wait_vblank(m_fd, &vbl);
 
     // 显示 framebuffer
-    int ret = drmModeSetPlane(
+    int ret = m_drm->set_plane(
         m_fd,
         m_plane_id,
         m_crtc_id,

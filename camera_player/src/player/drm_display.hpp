@@ -5,15 +5,19 @@
  */
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
 namespace player {
 
+class SystemInterface;
+class DrmInterface;
+
 class DrmDisplay
 {
 public:
-    DrmDisplay();
+    DrmDisplay(SystemInterface *sys = nullptr, DrmInterface *drm = nullptr);
     ~DrmDisplay();
 
     // 禁止拷贝
@@ -30,16 +34,6 @@ public:
     );
 
     void close();
-
-    /**
-     * 获取后台缓冲区
-     */
-    void *get_back_buffer(size_t *size);
-
-    /**
-     * 翻页显示
-     */
-    void flip();
 
     /**
      * 直接显示 NV12 dma-buf
@@ -92,6 +86,11 @@ private:
         const char *prop_name,
         uint64_t value
     );
+
+    SystemInterface *m_sys;
+    DrmInterface *m_drm;
+    bool m_own_sys;
+    bool m_own_drm;
 
     int m_fd;
     uint32_t m_crtc_id;
